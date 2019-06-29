@@ -6,24 +6,33 @@ client.once("ready", () => {
   client.user.setActivity("Fortnite for the Nintendo 3DS");
 });
 
-client.login("NTYzODc1MTU4NzM4MjA2NzIw.XKgFRQ.RRb0WPyEIgLTZkEWhUSHEiAZPSw");
+client.login(process.env.BOT_TOKEN);
 
 const helpEmbed = new Discord.RichEmbed()
-	.addField("-unscramble", "Get a word to unscramble.\nSUBCOMMANDS:")
-	.addField("-start", "Start the game.", true)
-	.addField("-end", "End the game.", true)
-	.addField("-numberguess", "Guess a random generated number.\nSUBCOMMANDS:")
-	.addField("-start", "Start the game with a number from 1-10.", true)
-	.addField("-start-(range)", "Start the game and choose the range.", true)
-	.addField("-end", "End the game.", true)
-	.addField("-8ball-(question)", "Ask the Magic 8-Ball a question and get a response.")
-	.addField("-mathsquestion", "Get a maths question to answer.\nSUBCOMMANDS:")
-	.addField("-addition", "Get an addition question.", true)
-	.addField("-subtraction", "Get a subtraction question.", true)
-	.addField("-multiplication", "Get a multiplication question.", true)
-	.addField("-division", "Get a division question.", true)
-	.addField("-(question type)-(range)", "Specify the range to generate a number from.", true)
-	.addField("-end", "End the game.", true)
+	.setColor("#78f7fe")
+	.setTitle("List of Commands")
+	.setDescription("Commands in UPPERCASE are main commands. Subcommands are in lowercase and are optional unless marked with *. \nExample: -mathsquestion-multiplication-12")
+
+	.addField("-UNSCRAMBLE", "Get a word to unscramble.")
+
+	.addField("-NUMBERGUESS", "Guess a random generated number.")
+	.addField("-range", "Choose the range for the random number to generate up to. Default range is 10.", true)
+
+	.addField("-8BALL-*question", "Ask the Magic 8-Ball a question and get a response.")
+
+	.addField("-MATHS / -MATHSQUESTION", "Get a maths question to answer.")
+	.addField("-add / -addition", "Get an addition question.", true)
+	.addField("-sub / -subtraction", "Get a subtraction question.", true)
+	.addField("-mul / -multiplication", "Get a multiplication question.", true)
+	.addField("-div / -division", "Get a division question.", true)
+	.addField("-range", "Specify the range to generate a number from.", true)
+
+	.addField("-ILLITERATE / -ILR", "Turn a message into an iLlItErAtE MeSsAgE with the second letter capitalised.", true)
+	.addField("-ILLITERATEFLIP / -ILRF", "Turn a message into an IlLiTeRaTe mEsSaGe with the first letter capitalised.", true)
+	.addField("-SEPARATE / -FRIENDZONE", "Insert spaces between the characters of a message.", true)
+	.addField("-LOWERCASE", "Convert a message to all lower case.", true)
+	.addField("-UPPERCASE", "Convert a message to all upper case.", true)
+
 	.setTimestamp();
 
 client.on("message", message => {
@@ -34,6 +43,7 @@ client.on("message", message => {
 
 	// Commands
 	if (args[0]) {
+		messageContent = messageContent.substr(args[0].length + 2, messageContent.length);
 		console.log(message.author.tag + ": " + args);
 		switch (args[0].toLowerCase()) {
 			case "ping":
@@ -43,44 +53,34 @@ client.on("message", message => {
 				message.channel.send(helpEmbed);
 				break;
 			case "unscramble":
-				if (!args[1]) {
-					message.reply("Not enough arguments.");
+				if (args[1] && args[1].toLowerCase() === "end") {
+					message.channel.send("Unscramble game ended. The word was **'" + unscrambledWord + "'**.");
+					unscrambledWord = "";
 					return;
 				};
-				switch (args[1].toLowerCase()) {
-					case "start":
-						unscrambledWord = words[Math.round(Math.random() * words.length)];
-						message.channel.send("Unscramble this: " + unscrambledWord.shuffle());
-						break;
-					case "end":
-						message.channel.send("Unscramble game ended. The word was **'" + unscrambledWord + "'**.");
-						unscrambledWord = "";
-						break;
-					};
+				unscrambledWord = words[Math.round(Math.random() * words.length)];
+				message.channel.send("Unscramble this: " + unscrambledWord.shuffle());
 				break;
 			case "numberguess":
-				if (!args[1]) {
-					message.reply("Not enough arguments.");
+				if (args[1] && isNaN(args[1]) && args[1].toLowerCase() === "end") {
+					message.channel.send("Number guessing game ended. The number was **'" + thoughtNumber + "'**.");
+					thoughtNumber = false;
+					return;
+				} else if (args[1] && isNaN(args[1])) {
+					message.reply("That's not a valid subcommand.");
 					return;
 				};
-				if (args[2] && !isNaN(args[2])) {
-					var number = args[2]
+				if (args[1] && !isNaN(args[1])) {
+					var number = args[1];
 				} else {
-					var number = 10
+					var number = 10;
 				};
-				switch (args[1].toLowerCase()) {
-					case "start":
-						thoughtNumber = Math.floor((Math.random() * number) + 1);
-						message.channel.send("What number from 1-" + number + " am I thinking of?");
-						break;
-					case "end":
-						message.channel.send("Number guessing game ended. The number was **'" + thoughtNumber + "'**.");
-						thoughtNumber = false;
-				}
+				thoughtNumber = Math.floor((Math.random() * number) + 1);
+				message.channel.send("What number from 1-" + number + " am I thinking of?");
 				break;
 			case "8ball":
 				if (!args[1]) {
-					message.reply("Not enough arguments.");
+					message.reply("Ask a question!");
 					return;
 				};
 				var messageContent = message.content.toLowerCase();
@@ -90,37 +90,41 @@ client.on("message", message => {
 					message.reply(responsesUnknown[Math.round(Math.random() * responsesUnknown.length - 1)])
 				}
 				break;
-			case "mathsquestion":
-				if (args[1]) {
-					var questionType = args[1].toLowerCase()
+			case "mathsquestion": case "maths":
+				if (args[1] && isNaN(args[1])) {
+					var questionType = args[1].toLowerCase();
+				} else if (args[2] && isNaN(args[2])) {
+					var questionType = args[2].toLowerCase();
 				} else {
-					var questionType = mathsTypes[Math.round(Math.random() * mathsTypes.length)]
+					var questionType = mathsTypes[Math.round(Math.random() * mathsTypes.length)];
 				};
-				if (args[2] && !isNaN(args[2])) {
-					var number = args[2]
+				if (args[1] && !isNaN(args[1])) {
+					var number = args[1];
+				} else if (args[2] && !isNaN(args[2])) {
+					var number = args[2];
 				} else {
-					var number = 64
+					var number = 64;
 				};
 				switch (questionType) {
-					case "addition":
+					case "addition": case "add":
 						firstNumber = Math.round(Math.random() * number);
 						secondNumber = Math.round(Math.random() * number);
 						mathsAnswer = firstNumber + secondNumber;
 						message.channel.send("What is **" + firstNumber + "** + **" + secondNumber + "** = ?");
 						break;
-					case "subtraction":
+					case "subtraction": case "sub":
 						firstNumber = Math.round(Math.random() * number);
 						secondNumber = Math.round(Math.random() * number);
 						mathsAnswer = firstNumber - secondNumber;
 						message.channel.send("What is **" + firstNumber + "** - **" + secondNumber + "** = ?");
 						break;
-					case "multiplication":
+					case "multiplication": case "mul":
 						firstNumber = Math.round(Math.random() * number);
 						secondNumber = Math.round(Math.random() * number);
 						mathsAnswer = firstNumber * secondNumber;
 						message.channel.send("What is **" + firstNumber + "** x **" + secondNumber + "** = ?");
 						break;
-					case "division":
+					case "division": case "div":
 						firstNumber = Math.floor((Math.random() * number) + 1);
 						secondNumber = Math.floor((Math.random() * number) + 1);
 						while (firstNumber % secondNumber != 0 || secondNumber == 1) {
@@ -136,10 +140,29 @@ client.on("message", message => {
 						secondNumber = false;
 						mathsAnswer = "nogame";
 						break;
+					default:
 				};
 				break;
+			case "illiterate": case "ilr":
+				var toFlip = 1;
+				message.channel.send(messageContent.illiterate(toFlip));
+				break;
+			case "illiterateflip": case "ilrf":
+				var toFlip = 0;
+				message.channel.send(messageContent.illiterate(toFlip));
+				break;
+			case "separate": case "friendzone":
+				// Taken from https://stackoverflow.com/a/7437419
+				message.channel.send(messageContent.split("").join(" "));
+				break;
+			case "lowercase":
+				message.channel.send(messageContent.toLowerCase());
+				break;
+			case "uppercase":
+				message.channel.send(messageContent.toUpperCase());
+				break;
 			default:
-
+				break;
 		};
 	};
 
@@ -158,7 +181,7 @@ client.on("message", message => {
 			message.reply("Higher!")
 		}
 	};
-	if (mathsAnswer != "nogame" && messageContent == mathsAnswer) {
+	if (mathsAnswer != "nogame" && message.content == mathsAnswer) {
 		message.reply("You got the answer! The answer was **'" + mathsAnswer + "'**.");
 		firstNumber = false;
 		secondNumber = false;
@@ -178,7 +201,18 @@ String.prototype.shuffle = function () {
         a[j] = tmp;
     }
     return a.join("");
-}
+};
+
+// Illiterate method (Lowercase followed by UPPERCASE for every other letter)
+String.prototype.illiterate = function (toFlip) {
+	var og = this.toLowerCase().split("");
+	for (var i = toFlip; i < og.length;) {
+		og[i] = og[i].toUpperCase();
+		i += 2;
+	};
+	return og.join("");
+};
+
 var words = [
 	"marvel",
 	"stark",
