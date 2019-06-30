@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const Canvas = require("canvas");
-const { Image } = require("canvas");
 //const fetch = require('node-fetch');
 const fetch = require("node-superfetch");
 
@@ -10,8 +9,9 @@ client.once("ready", () => {
   client.user.setActivity("Fortnite for the Nintendo 3DS");
 });
 
-client.login(process.env.BOT_TOKEN);
-//console.log("Remember to remove the bot token when commiting to GitHub!");
+//client.login(process.env.BOT_TOKEN);
+client.login("NTk0NDczOTM2OTQzNTc5MTY2.XRc9CQ.ve6bqf5jZxgi2uJTSckgGKIFPNk");
+console.log("Remember to remove the bot token when commiting to GitHub!");
 
 const helpEmbed = new Discord.RichEmbed()
 	.setColor("#78f7fe")
@@ -217,7 +217,7 @@ client.on("message", async message => {
 				};
 				var bottomtext = args[2];
 				if (bottomtext != "#") {
-					bottomtext = bottomtext.split("\\n");
+					bottomtext = bottomtext.split("\\n").reverse();
 				} else {
 					bottomtext = [];
 				};
