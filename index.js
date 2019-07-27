@@ -6,7 +6,7 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("Minecraft in Ultra 4K");
+  client.user.setActivity("Fortnite in Ultra 4K");
 });
 
 client.login(process.env.BOT_TOKEN);
@@ -306,6 +306,13 @@ client.on("message", async message => {
 				} else {
 					message.channel.send(messageContent);
 					message.channel.send("```" + messageContent + "```");
+				};
+				break;
+			case "random":
+				if (args[1] && !isNaN(args[1])) {
+					message.reply(Math.floor(Math.random() * Math.pow(10, args[1])));
+				} else {
+					message.reply(Math.floor(Math.random() * 10));
 				};
 				break;
 			default:
