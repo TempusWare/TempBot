@@ -6,7 +6,7 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("Minecraft on Blu-ray and Digital");
+  client.user.setActivity("Minecraft in Ultra 4K");
 });
 
 client.login(process.env.BOT_TOKEN);
@@ -367,59 +367,22 @@ String.prototype.illiterate = function (toFlip) {
 String.prototype.emoticonvert = function () {
 	var og = this.toLowerCase().split("");
 	for (var i = 0; i < og.length; i++) {
-		switch (og[i]) {
-			case "0":
-				og[i] = "zero";
-				break;
-			case "1":
-				og[i] = "one";
-				break;
-			case "2":
-				og[i] = "two";
-				break;
-			case "3":
-				og[i] = "three";
-				break;
-			case "4":
-				og[i] = "four";
-				break;
-			case "5":
-				og[i] = "five";
-				break;
-			case "6":
-				og[i] = "six";
-				break;
-			case "7":
-				og[i] = "seven";
-				break;
-			case "8":
-				og[i] = "eight";
-				break;
-			case "9":
-				og[i] = "nine";
-				break;
-			case " ":
-				og[i] = "white_small_square";
-				break;
-			case ".": case ",":
-				og[i] = "large_blue_circle";
-				break;
-			case "'": case '"':
-				og[i] = "small_blue_diamond";
-				break;
-			case "+":
-				og[i] = "heavy_plus_sign";
-				break;
-			case "-":
-				og[i] = "heavy_minus_sign";
-				break;
-			case "$":
-				og[i] = "heavy_dollar_sign";
-				break;
-			default:
-				og[i] = "regional_indicator_" + og[i];
+		var emotext = og[i];
+		if (emotext === " ") {
+			emotext = "white_small_square";
+		} else if (!isNaN(emotext)) {
+			for (var j = 0; j < 20; j = j + 2) {
+				if (emotext === numbersintext[j]) {
+					emotext = numbersintext[j + 1];
+					break;
+				};
+			};
+		} else if (letters.test(emotext)) {
+			emotext = "regional_indicator_" + emotext;
+		} else {
+			emotext = "white_small_square";
 		};
-		og[i] = ":" + og[i] + ":";
+		og[i] = ":" + emotext + ":";
 	};
 	return og.join(" ");
 };
@@ -489,3 +452,5 @@ var firstNumber;
 var secondNumber;
 var mathsAnswer = "nogame";
 var mathsTypes = ["addition", "subtraction", "multiplication", "division"];
+var letters = /^[a-zA-Z]/;
+var numbersintext = ["0", "zero", "1", "one", "2", "two", "3", "three", "4", "four", "5", "five", "6", "six", "7", "seven", "8", "eight", "9", "nine"];
