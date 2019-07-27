@@ -1,45 +1,23 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const Canvas = require("canvas");
+//const Canvas = require("canvas");
 //const fetch = require('node-fetch');
-const fetch = require("node-superfetch");
+//const fetch = require("node-superfetch");
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("Fortnite for the Nintendo 3DS");
+  client.user.setActivity("Minecraft on Blu-ray and Digital");
 });
 
-//client.login(process.env.BOT_TOKEN);
-client.login("NTk0NDczOTM2OTQzNTc5MTY2.XRc9CQ.ve6bqf5jZxgi2uJTSckgGKIFPNk");
-console.log("Remember to remove the bot token when commiting to GitHub!");
+client.login(process.env.BOT_TOKEN);
+//console.log("Remember to remove the bot token when commiting to GitHub!");
 
 const helpEmbed = new Discord.RichEmbed()
 	.setColor("#78f7fe")
 	.setTitle("List of Commands")
-	.setDescription("Commands in UPPERCASE are main commands. Subcommands are in lowercase and are optional unless written in italics. \nExamples: -maths-multiplication-12 | -caption-My name is-JEFF-#-https://website.com/image.png")
-
-	.addField("-UNSCRAMBLE", "Get a word to unscramble.")
-
-	.addField("-NUMBERGUESS", "Guess a random generated number.")
-	.addField("-range", "Choose the range for the random number to generate up to. Default range is 10.", true)
-
-	.addField("-8BALL-*question*", "Ask the Magic 8-Ball a question and get a response.")
-
-	.addField("-MATHS / -MATHSQUESTION", "Get a maths question to answer.")
-	.addField("-add / -addition", "Get an addition question.", true)
-	.addField("-sub / -subtraction", "Get a subtraction question.", true)
-	.addField("-mul / -multiplication", "Get a multiplication question.", true)
-	.addField("-div / -division", "Get a division question.", true)
-	.addField("-range", "Specify the range to generate a number from.", true)
-
-	.addField("-ILLITERATE / -ILR", "Turn a message into an iLlItErAtE MeSsAgE with the second letter capitalised.", true)
-	.addField("-ILLITERATEFLIP / -ILRF", "Turn a message into an IlLiTeRaTe mEsSaGe with the first letter capitalised.", true)
-	.addField("-SEPARATE / -FRIENDZONE", "Insert spaces between the characters of a message.", true)
-	.addField("-LOWERCASE", "Convert a message to all lower case.", true)
-	.addField("-UPPERCASE", "Convert a message to all upper case.", true)
-
-	.addField("-CAPTION-*toptext*-*bottomtext*-*smalltext*-image.png", "Add a caption to an image. Use # if you don't want to use a text. If an image is attached to the message, image.png isn't necessary. Use \\n to insert line breaks. Use \\aL at the start of an input to align text to the left or \\aR for the right. Browser version: https://tempusware.github.io/caption-adder/")
-
+	.setURL("https://github.com/TempusWare")
+	.setDescription("-unscramble\n-numberguess\n-8ball\n-maths\n-illiterate\n-separate\n-emoticonvert")
+	.setFooter("Online since:")
 	.setTimestamp();
 
 client.on("message", async message => {
@@ -59,7 +37,7 @@ client.on("message", async message => {
 			case "help":
 				message.channel.send(helpEmbed);
 				break;
-			case "unscramble":
+			case "unscramble": case "unscr":
 				// Subcommands
 				if (args[1]) {
 					switch (args[1]) {
@@ -79,7 +57,7 @@ client.on("message", async message => {
 				unscrambledWord = words[Math.round(Math.random() * words.length)];
 				message.channel.send("Unscramble this: " + unscrambledWord.shuffle());
 				break;
-			case "numberguess":
+			case "numberguess": case "numg":
 				if (args[1]) {
 					if (isNaN(args[1])) {
 						switch (args[1].toLowerCase()) {
@@ -169,24 +147,29 @@ client.on("message", async message => {
 				};
 				break;
 			case "illiterate": case "ilr":
+				if (!args[1]) {message.reply("Say something!"); return;};
 				var toFlip = 1;
 				message.channel.send(messageContent.illiterate(toFlip));
 				break;
 			case "illiterateflip": case "ilrf":
+				if (!args[1]) {message.reply("Say something!"); return;};
 				var toFlip = 0;
 				message.channel.send(messageContent.illiterate(toFlip));
 				break;
-			case "separate": case "friendzone":
+			case "separate": case "friendzone": case "sep":
+				if (!args[1]) {message.reply("Say something!"); return;};
 				// Taken from https://stackoverflow.com/a/7437419
 				message.channel.send(messageContent.split("").join(" "));
 				break;
-			case "lowercase":
+			case "lowercase": case "lc":
+				if (!args[1]) {message.reply("Say something!"); return;};
 				message.channel.send(messageContent.toLowerCase());
 				break;
-			case "uppercase":
+			case "uppercase": case "uc":
+				if (!args[1]) {message.reply("Say something!"); return;};
 				message.channel.send(messageContent.toUpperCase());
 				break;
-			case "caption":
+			/*case "caption":
 				if (!args[3]) {
 					message.reply("Not enough arguments. Command usage is as follows: -caption-Top text-Bottom text-Small text-https://website.com/image.png. To leave a text blank, use # in its place. An image url must be provided if an image isn't attached. PNGs only.");
 					return;
@@ -198,13 +181,13 @@ client.on("message", async message => {
 					imgSrc = message.attachments.array()[0].url;
 					console.log("IMAGE ATTACHED.")
 				};
-				if (args[4] && args[4].endsWith(".png")) {
-					imgSrc = args[4];
+				if (message.content.endsWith(".png")) {
+					imgSrc = message.content.substr(args[0].length + args[1].length + args[2].length + args[3].length + 5, message.content.length);
 					console.log("IMAGE LINKED.")
 				};
 				if (!imgSrc) {
 					console.log("NO IMAGE LOADED.");
-					message.reply("No image was attached or linked. Only PNGs are accepted. If you're linking an image (using a url), this command can't accept filenames with a hyphen (-).");
+					message.reply("No image was attached or linked. Only PNGs are accepted.");
 					return;
 				};
 
@@ -309,8 +292,24 @@ client.on("message", async message => {
 				const attachment = new Discord.Attachment(canvas.toBuffer(), "image.png");
 				message.reply("Here is your image:", attachment);
 
+				break;*/
+			case "reverse": case "rev":
+				// Taken from https://stackoverflow.com/a/959004
+				if (!args[1]) {message.reply("Say something!"); return;};
+				message.channel.send(messageContent.split("").reverse().join(""));
+				break;
+			case "emoticonvert": case "emrt":
+				if (!args[1]) {message.reply("Say something!"); return;};
+				messageContent = messageContent.emoticonvert();
+				if (messageContent.length > 2000) {
+					message.reply("The output message would be too long. Output message length: " + messageContent.length);
+				} else {
+					message.channel.send(messageContent);
+					message.channel.send("```" + messageContent + "```");
+				};
 				break;
 			default:
+				message.reply("That's not a valid command. You might be delimiting incorrectly (*The correct way to set out a command is like follows:* `-8ball-Is Club Penguin the best game ever created? **or** ``-maths-add-100` **or** ``-illiterate-Minecraft good Fortnite bad`).");
 				break;
 		};
 	};
@@ -362,6 +361,67 @@ String.prototype.illiterate = function (toFlip) {
 		i += 2;
 	};
 	return og.join("");
+};
+
+// Convert to emoticons/emojis
+String.prototype.emoticonvert = function () {
+	var og = this.toLowerCase().split("");
+	for (var i = 0; i < og.length; i++) {
+		switch (og[i]) {
+			case "0":
+				og[i] = "zero";
+				break;
+			case "1":
+				og[i] = "one";
+				break;
+			case "2":
+				og[i] = "two";
+				break;
+			case "3":
+				og[i] = "three";
+				break;
+			case "4":
+				og[i] = "four";
+				break;
+			case "5":
+				og[i] = "five";
+				break;
+			case "6":
+				og[i] = "six";
+				break;
+			case "7":
+				og[i] = "seven";
+				break;
+			case "8":
+				og[i] = "eight";
+				break;
+			case "9":
+				og[i] = "nine";
+				break;
+			case " ":
+				og[i] = "white_small_square";
+				break;
+			case ".": case ",":
+				og[i] = "large_blue_circle";
+				break;
+			case "'": case '"':
+				og[i] = "small_blue_diamond";
+				break;
+			case "+":
+				og[i] = "heavy_plus_sign";
+				break;
+			case "-":
+				og[i] = "heavy_minus_sign";
+				break;
+			case "$":
+				og[i] = "heavy_dollar_sign";
+				break;
+			default:
+				og[i] = "regional_indicator_" + og[i];
+		};
+		og[i] = ":" + og[i] + ":";
+	};
+	return og.join(" ");
 };
 
 var words = [

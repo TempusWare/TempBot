@@ -9,9 +9,6 @@
   "author": "TempusWare",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.5.0",
-    "discord.js": "^11.5.1",
-    "node-fetch": "^2.6.0",
-    "node-superfetch": "^0.1.9"
+    "discord.js": "^11.5.1"
   }
 }
