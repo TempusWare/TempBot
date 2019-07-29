@@ -8,8 +8,6 @@ client.once("ready", () => {
 
 client.login(process.env.BOT_TOKEN);
 
-
-
 client.on("message", async message => {
   if (message.author.bot) {return};
 	var 	messageContent 	= message.content,
@@ -245,8 +243,8 @@ client.on("message", async message => {
 			case "emoticonvert": case "emrt":
 				if (!args[1]) {message.reply("Say something!"); return;};
 				var delmsg = false;
-				if (messageContent.includes("DELMSG")) {
-					messageContent = messageContent.split("DELMSG").join("");
+				if (args[1].toLowerCase() === "delmsg") {
+					messageContent = messageContent.substr(args[1].length + 1, messageContent.length);
 					delmsg = true;
 				};
 				messageContent = messageContent.emoticonvert();
@@ -367,13 +365,8 @@ String.prototype.emoticonvert = function () {
 		var emotext = og[i];
 		if (emotext === " ") {
 			emotext = "white_small_square";
-		} else if (!isNaN(emotext)) {
-			for (var j = 0; j < 20; j = j + 2) {
-				if (emotext === numbersintext[j]) {
-					emotext = numbersintext[j + 1];
-					break;
-				};
-			};
+		} else if (emoticonvertSpecials.hasOwnProperty(emotext)) {
+			emotext = emoticonvertSpecials[emotext];
 		} else if (letters.test(emotext)) {
 			emotext = "regional_indicator_" + emotext;
 		} else {
@@ -397,7 +390,7 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 				responses = ["Definitely not. (Captain Marvel 77:18)","Definitely not. (Doctor Strange 11:22)","No. Definitely not. (III Captain America 58:37)","Probably. Yeah. (II Iron Man 52:12)","Probably not, to be honest. (III Thor 123:05)","Absolutely. (I Ant-Man 44:24)","Absolutely not! (I Ant-Man 47:08)","No. No, absolutely not. (I Iron Man 59:10)","Absolutely, we're... I'm going to have to call you back. (I Iron Man 95:04)","Absolutely. (II Iron Man 11:30)","Absolutely. (II Iron Man 80:08)","Absolutely. (III Avengers 72:08)","Yes, my son. (Black Panther 0:07)","Yes, General. (Black Panther 14:10)","For now, yes. (Doctor Strange 52:24)","The answer is yes. (Doctor Strange 76:22)","Oh, yes. Promptly. (Doctor Strange 107:24)","Yes, ma'am. (II Avengers 40:35)","That is not possible. (Black Panther 64:32)","Experimental and expensive, but possible. (Doctor Strange 14:30)","It's impossible. (I Guardians of the Galaxy 78:11)","Oh, I don't doubt it. (III Iron Man 51:49)","We have no idea (Captain Marvel 111:44)","I've got no idea. (I Iron Man 81:19)","I'm not sure. (I Spider-Man 54:57)","I'm not sure. (II Ant-Man 14:08)","Not sure. I'm working on it. (III Avengers 17:53)","With all due respect, I'm not sure the science really supports that. (IV Avengers 83:46)","I'm not sure. (III Thor 120:11)","I'm not sure. (IV Avengers 161:15)","I don't know. (Captain Marvel 60:58)","I don't know. I hadn't gotten to that part yet. (Doctor Strange 51:38)","I don't know. (Doctor Strange 67:59)"],
 				mathsTypes = ["addition", "subtraction", "multiplication", "division"],
 				letters = /^[a-zA-Z]/,
-				numbersintext = ["0", "zero", "1", "one", "2", "two", "3", "three", "4", "four", "5", "five", "6", "six", "7", "seven", "8", "eight", "9", "nine"],
+				emoticonvertSpecials = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine"},
 				rpsChoices = ["rock", "paper", "scissors"],
 				rpsBeats = {scissors: "paper", paper: "rock", rock: "scissors"};
 var games = {
