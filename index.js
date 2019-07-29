@@ -282,6 +282,7 @@ client.on("message", async message => {
 
 			case "rockpaperscissors": case "scissorspaperrock": case "rps": case "spr": case "handgame":
 				if (args[1] && args[1].toLowerCase() === "end") {
+					if (!games.scissorspaperrock.hasOwnProperty(message.author.id)) {message.reply("You're not in a game!"); return};
 					message.channel.send(message.author + " and " + games.scissorspaperrock[games.scissorspaperrock[messageAuthor]["opponent"]]["tag"] + "\'s game of scissors-paper-rock has been cancelled.");
 					delete games.scissorspaperrock[games.scissorspaperrock[messageAuthor]["opponent"]];
 					delete games.scissorspaperrock[messageAuthor];
