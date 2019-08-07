@@ -268,18 +268,12 @@ client.on("message", async message => {
 
 			case "emoticonvert": case "emrt":
 				if (!args[1]) {message.reply("Say something!"); return;};
-				var delmsg = false;
-				if (args[1].toLowerCase() === "delmsg") {
-					messageContent = messageContent.substr(args[1].length + 1, messageContent.length);
-					delmsg = true;
-				};
 				messageContent = messageContent.emoticonvert();
 				if (messageContent.length > 2000) {
 					message.reply("The output message would be too long. Output message length: " + messageContent.length);
 				} else {
-					if (delmsg) {message.delete()};
 					message.channel.send(messageContent);
-					if (!delmsg) {message.channel.send("```" + messageContent + "```");}
+					message.channel.send("```" + messageContent + "```");
 				};
 				break;
 

@@ -41,8 +41,6 @@ T u r n   a   m e s s a g e   i n t o   t h i s .
 ##### /emoticonvert
 🇹🇺🇷🇳▫️🇦🇲🇪🇸🇸🇦🇬🇪▫️🇮🇳🇹🇴▫️🇹🇭🇮🇸▫️\
 *Alias(es):* `emrt`\
-**Subcommands:**
-- delmsg
 
 ### Other things
 ##### /8ball
