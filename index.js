@@ -85,10 +85,11 @@ client.on("message", async message => {
 				var server = games.hangman.hosts[authorId];
 
 				games.hangman.servers[server].word = word;
+				games.hangman.servers[server].stage = 0;
 
 				message.reply("The word you have chosen is " + word.emoticonvert());
 
-				client.channels.get(server).send("A game of hangman has been started by " + message.author + ". Guess the word!\n" + word.hangmanconvert());
+				client.channels.get(server).send("A game of hangman has been started by " + message.author + ". Guess the word!\n" + word.hangmanconvert(), {files: [hangmanStages[0]]});
 
 				delete games.hangman.hosts[authorId];
 			};
@@ -101,14 +102,20 @@ client.on("message", async message => {
 						message.channel.send("The word has " + guess.emoticonvert() + " as guessed by " + message.author + "\n" + games.hangman.servers[messageChannel].word.hangmanconvert());
 
 						if (lettersHigh.test(games.hangman.servers[messageChannel].word)) {
-							message.channel.send("The entire word has been uncovered!");
+							message.channel.send("The entire word has been uncovered! :checkered_flag:");
 							delete games.hangman.servers[messageChannel];
 						};
 					} else {
-						message.channel.send("The word does not have " + guess.emoticonvert() + " as guessed by " + message.author);
+						games.hangman.servers[messageChannel].stage++;
+						if (games.hangman.servers[messageChannel].stage < 6) {
+							message.channel.send("The word does not have " + guess.emoticonvert() + " as guessed by " + message.author, {files: [hangmanStages[games.hangman.servers[messageChannel].stage]]});
+						} else {
+							message.channel.send("The word does not have " + guess.emoticonvert() + " as guessed by " + message.author + "\nThe word was " + games.hangman.servers[messageChannel].word.emoticonvert() + " Game over!", {files: [hangmanStages[6]]});
+							delete games.hangman.servers[messageChannel];
+						};
 					};
 				} else if (guess === word.toLowerCase()) { // Guessing the whole word
-					message.channel.send("The whole word has been guessed correctly by " + message.author + "!\nThe word was " + word.emoticonvert());
+					message.channel.send("The whole word has been guessed correctly by " + message.author + " :checkered_flag:\nThe word was " + word.emoticonvert());
 					delete games.hangman.servers[messageChannel];
 				};
 			};
@@ -344,6 +351,15 @@ client.on("message", async message => {
 						delete games.scissorspaperrock[opponent];
 						delete games.scissorspaperrock[player];
 						break;
+					case "hangman":
+						if (!games.hangman.servers.hasOwnProperty(messageChannel)) {message.reply(reusedMessages.notplaying); return};
+						if (games.hangman.servers[messageChannel].hasOwnProperty("word")) {
+							message.channel.send("The game of hangman has been cancelled. The word was " + games.hangman.servers[messageChannel].word.emoticonvert());
+						} else {
+							message.channel.send("The game of hangman has been cancelled. No word was given by the host.");
+						};
+						delete games.hangman.servers[messageChannel];
+						break;
 					default:
 						message.reply("Can't end those games yet / That's not a game I have.")
 				};
@@ -354,8 +370,6 @@ client.on("message", async message => {
 				if (gameRunning) {message.reply(reusedMessages.alreadyplaying); return};
 
 				games.hangman.servers[messageChannel] = new Object();
-				//games.hangman.servers[messageChannel].host = authorId;
-				//games.hangman.servers[messageChannel].id = messageChannel;
 				games.hangman.hosts[authorId] = messageChannel;
 
 				message.reply("DM me the word.");
@@ -444,7 +458,8 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 				letters = /^[a-zA-Z]/, lettersAll = /^[a-z]+$/, lettersLow = /^[a-z]/, lettersHigh = /^[A-Z]+$/,
 				emoticonvertSpecials = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "keycap_ten"},
 				rpsChoices = ["rock", "paper", "scissors"],
-				rpsBeats = {scissors: "paper", paper: "rock", rock: "scissors"};
+				rpsBeats = {scissors: "paper", paper: "rock", rock: "scissors"},
+				hangmanStages = ["https://cdn.discordapp.com/attachments/595019294383800320/608604818528796673/tempbot-hangman-0.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604827966111764/tempbot-hangman-1.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604826200309761/tempbot-hangman-2.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604824803606529/tempbot-hangman-3.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604823197319178/tempbot-hangman-4.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604821796159508/tempbot-hangman-5.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604820349124609/tempbot-hangman-6.jpg"];
 
 var games = {
 	unscramble: {},

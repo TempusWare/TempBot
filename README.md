@@ -43,6 +43,7 @@ T u r n   a   m e s s a g e   i n t o   t h i s .
 *Alias(es):* `emrt`\
 **Subcommands:**
 - delmsg
+
 ### Other things
 ##### /8ball
 Ask the magic 8ball a question.
@@ -53,3 +54,7 @@ Generate a random number.\
 *Alias(es):* `dice` `roll`\
 **Subcommands:**
 - (range) (multiple of 10)
+##### /endgame
+End a game started in a server. No permissions are required.\
+**Subcommands:**
+- (game)
