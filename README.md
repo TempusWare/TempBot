@@ -57,3 +57,5 @@ Generate a random number.\
 End a game started in a server. No permissions are required.\
 **Subcommands:**
 - (game)
+##### /avatar
+Get a person's avatar

@@ -400,6 +400,25 @@ client.on("message", async message => {
 				message.author.send(`You have started a game of hangman in **${message.channel.name}**. What's the word?`);
 				break;
 
+			case "avatar":
+				if (message.mentions.users.size) {
+					var tagged = message.mentions.users.first();
+					if (tagged.avatarURL) {
+						var url = tagged.avatarURL;
+						message.channel.send(message.author, {files: [url.substr(0, url.length - 9)]});
+					} else {
+						message.reply("That user doesn't have an avatar!");
+					};
+				} else {
+					if (message.author.avatarURL) {
+						var url = message.author.avatarURL;
+						message.channel.send(message.author, {files: [url.substr(0, url.length - 9)]});
+					} else {
+						message.reply("You don't have an avatar!");
+					};
+				};
+				break;
+
 			default:
 				message.reply(reusedMessages.invalidcommand);
 				break;
