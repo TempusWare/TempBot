@@ -34,7 +34,7 @@ tUrN A MeSsAgE iNtO tHiS.\
 ##### /separate
 T u r n   a   m e s s a g e   i n t o   t h i s .
 **Subcommands:**
-- r<number of spaces>
+- r(number of spaces)
 ##### /reverse
 .siht otni egassem a nruT\
 *Alias(es):* `rev`
