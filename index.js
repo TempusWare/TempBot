@@ -23,7 +23,7 @@ client.on("message", async message => {
 				var guess = messageContent;
 				var number = games.numberguess[messageChannel];
 				if (guess == number) {
-					message.reply(reusedMessages.correctanswer("number", number));
+					message.reply(`You got the number! The number was ${number}.`);
 					delete games.numberguess[messageChannel];
 				} else if (guess > number) {
 					message.reply("Lower!");
@@ -33,13 +33,13 @@ client.on("message", async message => {
 			};
 			// MATHS QUESTION game
 			if (games.mathsquestion.hasOwnProperty(messageChannel) && messageContent == games.mathsquestion[messageChannel]) {
-				message.reply(reusedMessages.correctanswer("answer", games.mathsquestion[messageChannel]));
+				message.reply(`You got the correct answer! The answer was ${games.mathsquestion[messageChannel]}.`);
 				delete games.mathsquestion[messageChannel];
 			};
 		} else { // Word responses
 			// UNSCRAMBLE game
 			if (games.unscramble.hasOwnProperty(messageChannel) && messageContent.toLowerCase().includes(games.unscramble[messageChannel])) {
-				message.reply(reusedMessages.correctanswer("word", games.unscramble[messageChannel]));
+				message.reply(`You got the word! The word was ${games.unscramble[messageChannel]}.`);
 				delete games.unscramble[messageChannel];
 			};
 			// SCISSORS PAPER ROCK game
@@ -52,7 +52,7 @@ client.on("message", async message => {
 							opponentTag = games.scissorspaperrock[opponent]["tag"];
 
 				games.scissorspaperrock[player]["choice"] = playerChoice;
-				message.reply("You have chosen **" + playerChoice + "**.");
+				message.reply(`You have chosen **${playerChoice}**.`);
 				opponentTag.send("Your opponent has made their choice.");
 
 				if (!games.scissorspaperrock[opponent].hasOwnProperty("choice")) {message.reply("Awaiting your opponent's choice..."); return};
@@ -61,15 +61,15 @@ client.on("message", async message => {
 							gameChannel = client.channels.get(games.scissorspaperrock[player]["channel"]);
 
 				if (rpsBeats[playerChoice] === opponentChoice) { // Player wins
-					gameChannel.send(playerTag + "\'s **" + playerChoice + "** beat " + opponentTag + "\'s **" + opponentChoice + "** in a game of scissors-paper-rock.");
+					gameChannel.send(`${playerTag}'s **${playerChoice}** beat ${opponentTag}'s **${opponentChoice}** in a game of scissors-paper-rock.`);
 					delete games.scissorspaperrock[opponent];
 					delete games.scissorspaperrock[player];
 				} else if (rpsBeats[opponentChoice] === playerChoice) { // Opponent wins
-					gameChannel.send(opponentTag + "\'s **" + opponentChoice + "** beat " + playerTag + "\'s **" + playerChoice + "** in a game of scissors-paper-rock.");
+					gameChannel.send(`${opponentTag}'s **${opponentChoice}** beat ${playerTag}'s **${playerChoice}** in a game of scissors-paper-rock.`);
 					delete games.scissorspaperrock[opponent];
 					delete games.scissorspaperrock[player];
 				} else { // Tie
-					gameChannel.send(opponentTag + " and " + playerTag + " both chose **" + playerChoice + "** in a game of scissors-paper-rock, resulting in a tie.");
+					gameChannel.send(`${opponentTag} and ${playerTag} both chose **${playerChoice}** in a game of scissors-paper-rock, resulting in a tie.`)
 					delete games.scissorspaperrock[opponent];
 					delete games.scissorspaperrock[player];
 				};
@@ -89,7 +89,7 @@ client.on("message", async message => {
 
 				message.reply("The word you have chosen is " + word.emoticonvert());
 
-				client.channels.get(server).send("A game of hangman has been started by " + message.author + ". Guess the word!\n" + word.hangmanconvert(), {files: [hangmanStages[0]]});
+				client.channels.get(server).send(`A game of hangman has been started by ${message.author}. Guess the word!\n${word.hangmanconvert()}`, {files: [hangmanStages[0]]});
 
 				delete games.hangman.hosts[authorId];
 			};
@@ -99,7 +99,7 @@ client.on("message", async message => {
 				if (guess.length == 1 && letters.test(guess)) {
 					if (word.includes(guess)) {
 						games.hangman.servers[messageChannel].word = word.replace(new RegExp(guess, "g"), guess.toUpperCase());
-						message.channel.send("The word has " + guess.emoticonvert() + " as guessed by " + message.author + "\n" + games.hangman.servers[messageChannel].word.hangmanconvert());
+						message.channel.send(`The word has ${guess.emoticonvert()} as guessed by ${message.author}\n${games.hangman.servers[messageChannel].word.hangmanconvert()}`);
 
 						if (lettersHigh.test(games.hangman.servers[messageChannel].word)) {
 							message.channel.send("The entire word has been uncovered! :checkered_flag:");
@@ -108,14 +108,14 @@ client.on("message", async message => {
 					} else {
 						games.hangman.servers[messageChannel].stage++;
 						if (games.hangman.servers[messageChannel].stage < 6) {
-							message.channel.send("The word does not have " + guess.emoticonvert() + " as guessed by " + message.author, {files: [hangmanStages[games.hangman.servers[messageChannel].stage]]});
+							message.channel.send(`The word does not have ${guess.emoticonvert()} as guessed by ${message.author}`, {files: [hangmanStages[games.hangman.servers[messageChannel].stage]]})
 						} else {
-							message.channel.send("The word does not have " + guess.emoticonvert() + " as guessed by " + message.author + "\nThe word was " + games.hangman.servers[messageChannel].word.emoticonvert() + " Game over!", {files: [hangmanStages[6]]});
+							message.channel.send(`The word does not have ${guess.emoticonvert()} as guessed by ${message.author}\nThe word was ${games.hangman.servers[messageChannel].word.emoticonvert()} Game over!`, {files: [hangmanStages[6]]});
 							delete games.hangman.servers[messageChannel];
 						};
 					};
 				} else if (guess === word.toLowerCase()) { // Guessing the whole word
-					message.channel.send("The whole word has been guessed correctly by " + message.author + " :checkered_flag:\nThe word was " + word.emoticonvert());
+					message.channel.send(`The whole word has been guessed correctly by ${message.author} :checkered_flag:\nThe word was ${word.emoticonvert()}`);
 					delete games.hangman.servers[messageChannel];
 				};
 			};
@@ -142,10 +142,10 @@ client.on("message", async message => {
 				if (!gameRunning) {
 					if (args[1]) {message.reply(reusedMessages.notplaying); return};
 					games.unscramble[messageChannel] = words[Math.round(Math.random() * words.length)];
-					message.channel.send("Unscramble this: " + games.unscramble[messageChannel].shuffle());
+					message.channel.send(`Unscramble this: ${games.unscramble[messageChannel].shuffle()}`);
 				} else {
 					if (args[1] && args[1].toLowerCase() === "hint") {
-						message.channel.send("Rescrambled: " + games.unscramble[messageChannel].shuffle());
+						message.channel.send(`Rescrambled: ${games.unscramble[messageChannel].shuffle()}`);
 					} else if (args[1]) {
 						message.reply(reusedMessages.invalidcommand);
 					} else {
@@ -166,7 +166,7 @@ client.on("message", async message => {
 						var number = 10;
 					};
 					games.numberguess[messageChannel] = Math.floor((Math.random() * number) + 1);
-					message.channel.send("What number from 1-" + number + " am I thinking of?");
+					message.channel.send(`What number from 1-${number} am I thinking of?`);
 				} else {
 					if (args[1]) {
 						message.reply(reusedMessages.invalidcommand);
@@ -205,15 +205,15 @@ client.on("message", async message => {
 				switch (questionType) {
 					case "addition": case "add":
 						games.mathsquestion[messageChannel] = numberA + numberB;
-						message.channel.send("What is **" + numberA + "** + **" + numberB + "** = ?");
+						message.channel.send(`What is **${numberA}** + **${numberB}** = ?`);
 						break;
 					case "subtraction": case "sub":
 						games.mathsquestion[messageChannel] = numberA - numberB;
-						message.channel.send("What is **" + numberA + "** - **" + numberB + "** = ?");
+						message.channel.send(`What is **${numberA}** - **${numberB}** = ?`);
 						break;
 					case "multiplication": case "mul":
 						games.mathsquestion[messageChannel] = numberA * numberB;
-						message.channel.send("What is **" + numberA + "** x **" + numberB + "** = ?");
+						message.channel.send(`What is **${numberA}** x **${numberB}** = ?`);
 						break;
 					case "division": case "div":
 						while (numberA % numberB != 0 || numberB == 1) {
@@ -221,7 +221,7 @@ client.on("message", async message => {
 							numberB = Math.floor((Math.random() * range) + 1);
 						};
 						games.mathsquestion[messageChannel] = numberA / numberB;
-						message.channel.send("What is **" + numberA + "** / **" + numberB + "** = ?");
+						message.channel.send(`What is **${numberA}** / **${numberB}** = ?`);
 						break;
 					default:
 						message.reply(reusedMessages.invalidcommand);
@@ -270,7 +270,7 @@ client.on("message", async message => {
 				if (!args[1]) {message.reply("Say something!"); return;};
 				messageContent = messageContent.emoticonvert();
 				if (messageContent.length > 2000) {
-					message.reply("The output message would be too long. Output message length: " + messageContent.length);
+					message.reply(`The output message would be too long. Output message length: ${messageContent.length}`);
 				} else {
 					message.channel.send(messageContent);
 					message.channel.send("```" + messageContent + "```");
@@ -287,7 +287,7 @@ client.on("message", async message => {
 
 			case "count":
 				if (!args[1]) {message.reply("Say something!"); return};
-				message.reply("Your message contained **" + messageContent.split(" ").length + "** words and **" + messageContent.length + "** characters. (**" + messageContent.split(" ").join("").length + "** characters, excluding spaces.)");
+				message.reply(`Your message contained **${messageContent.split(" ").length}** words and **${messageContent.length}** characters. (**${messageContent.split(" ").join("").length}** characters, excludine spaces.)`);
 				break;
 
 			case "log": case "gamelog": case "loggame":
@@ -298,17 +298,17 @@ client.on("message", async message => {
 			case "setactivity": case "setact":
 				if (message.author.id != tempus) {return};
 				client.user.setActivity(messageContent);
-				console.log("Set activity to " + messageContent);
+				console.log(`Set activity to ${messageContent}`);
 				break;
 
 			case "rockpaperscissors": case "scissorspaperrock": case "rps": case "spr": case "handgame":
-				if (games.scissorspaperrock.hasOwnProperty(messageAuthor)) {message.reply("You're already in a game of scissors-paper-rock with " + games.scissorspaperrock[games.scissorspaperrock[player]["opponent"]]["tag"] + "!"); return};
+				if (games.scissorspaperrock.hasOwnProperty(messageAuthor)) {message.reply(`You're already in a game of scissors-paper-rock with ${games.scissorspaperrock[games.scissorspaperrock[player]["opponent"]]["tag"]}!`); return};
 				if (!message.mentions.users.size) {message.reply("No one was mentioned."); return};
 				var taggedId = message.mentions.users.first().id;
 				console.log(authorId + " " + taggedId)
 				if (authorId === taggedId) {message.reply("You can't challenge yourself!"); return};
 				if (taggedId === testbot || taggedId === tempbot) {message.reply("You can't challenge me!"); return};
-				if (games.scissorspaperrock.hasOwnProperty(taggedId)) {message.reply(message.mentions.users.first() + " is already in a game of scissors-paper-rock!"); return};
+				if (games.scissorspaperrock.hasOwnProperty(taggedId)) {message.reply(`${message.mentions.users.first()} is already in a game of scissors-paper-rock!`); return};
 
 				games.scissorspaperrock[authorId] = new Object();
 				games.scissorspaperrock[taggedId] = new Object();
@@ -319,9 +319,9 @@ client.on("message", async message => {
 				games.scissorspaperrock[authorId].tag = message.author;
 				games.scissorspaperrock[taggedId].tag = message.mentions.users.first();
 
-				message.channel.send("A game of scissors-paper-rock with " + games.scissorspaperrock[authorId].tag + " and " + games.scissorspaperrock[taggedId].tag + " has been started. Direct message me **scissors**, **paper** or **rock**.");
-				message.author.send("You have started a game of scissors-paper-rock with " + games.scissorspaperrock[taggedId].tag + " (" + games.scissorspaperrock[taggedId].tag.username + "). What do you choose? You can choose from **scissors**, **paper** and **rock**.");
-				message.mentions.users.first().send(games.scissorspaperrock[authorId].tag + " (" + games.scissorspaperrock[authorId].tag.username + ") has started a game of scissors-paper-rock with you. What do you choose? You can choose from **scissors**, **paper** and **rock**.");
+				message.channel.send(`A game of scissors-paper-rock with ${games.scissorspaperrock[authorId].tag} and ${games.scissorspaperrock[taggedId].tag} has been started. Direct message me **scissors**, **paper** or **rock**.`);
+				message.author.send(`You have started a game of scissors-paper-rock with ${games.scissorspaperrock[taggedId].tag} (${games.scissorspaperrock[taggedId].tag.username}). What do you choose? You can choose from **scissors**, **paper** and **rock**.`);
+				message.mentions.users.first().send(`${games.scissorspaperrock[authorId].tag} (${games.scissorspaperrock[authorId].tag.username}) has started a game of scissors-paper-rock with you. What do you choose? You can choose from **scissors**, **paper** and **rock**.`);
 				break;
 
 			case "endgame":
@@ -330,7 +330,7 @@ client.on("message", async message => {
 				switch (args[1].toLowerCase()) {
 					case "unscramble": case "numberguess": case "mathsquestion":
 						if (games[args[1].toLowerCase()].hasOwnProperty(message.channel.id)) {
-							message.channel.send("**" + args[1].toUpperCase() + "** game ended. The answer was **" + games[args[1].toLowerCase()][message.channel.id] + "**.");
+							message.channel.send(`**${args[1].toUpperCase()}** game ended. The answer was **${games[args[1].toLowerCase()][message.channel.id]}**.`);
 							delete games[args[1].toLowerCase()][message.channel.id];
 						} else {
 							message.reply("There's no game of that type running in this server!");
@@ -339,23 +339,23 @@ client.on("message", async message => {
 					case "rps": case "spr": case "rockpaperscissors": case "scissorspaperrock":
 						if (!games.scissorspaperrock.hasOwnProperty(message.author.id)) {message.reply(reusedMessages.notinagame); return};
 						var opponent = games.scissorspaperrock[player]["opponent"];
-						message.channel.send(message.author + " and " + games.scissorspaperrock[opponent]["tag"] + "\'s game of scissors-paper-rock has been cancelled.");
-						games.scissorspaperrock[opponent]["tag"].send("Your game of scissors-paper-rock with " + message.author + " has been cancelled.");
-						message.author.send("Your game of scissors-paper-rock with " + games.scissorspaperrock[opponent]["tag"] + " has been cancelled.");
+						message.channel.send(`${message.author} and ${games.scissorspaperrock[opponent]["tag"]}'s game of scissors-paper-rock has been cancelled.`);
+						games.scissorspaperrock[opponent]["tag"].send(`Your game of scissors-paper-rock with ${message.author} has been cancelled.`);
+						message.author.send(`Your game of scissors-paper-rock with ${games.scissorspaperrock[opponent]["tag"]} has been cancelled.`);
 						delete games.scissorspaperrock[opponent];
 						delete games.scissorspaperrock[player];
 						break;
 					case "hangman":
 						if (!games.hangman.servers.hasOwnProperty(messageChannel)) {message.reply(reusedMessages.notplaying); return};
 						if (games.hangman.servers[messageChannel].hasOwnProperty("word")) {
-							message.channel.send("The game of hangman has been cancelled. The word was " + games.hangman.servers[messageChannel].word.emoticonvert());
+							message.channel.send(`The game of hangman has been cancelled. The word was ${games.hangman.servers[messageChannel].word.emoticonvert()}`);
 						} else {
 							message.channel.send("The game of hangman has been cancelled. No word was given by the host.");
 						};
 						delete games.hangman.servers[messageChannel];
 						break;
 					default:
-						message.reply("Can't end those games yet / That's not a game I have.")
+						message.reply("That's not a game I have.")
 				};
 				break;
 
@@ -367,7 +367,7 @@ client.on("message", async message => {
 				games.hangman.hosts[authorId] = messageChannel;
 
 				message.reply("DM me the word.");
-				message.author.send("You have started a game of hangman in **" + message.channel.name + "**. What's the word?");
+				message.author.send(`You have started a game of hangman in **${message.channel.name}**. What's the word?`);
 				break;
 
 			default:
@@ -441,8 +441,6 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 					invalidcommand: "That's not a valid command/subcommand!",
 					alreadyplaying: "There's already a game of this type running in this server!",
 					notplaying: "There's no game of this type running in this server!",
-					correctanswer: function (keyword, answer) {return "You got the " + keyword + "! The " + keyword + " was **" + answer + "**.";},
-					endgame: function (game, keyword, answer) {return game + " game ended. The " + keyword + " was **" + answer + "**.";},
 					notinagame: "You're not in a game!",
 					noarguments: "You didn't add a subcommand / Not enough arguments!",
 					},
