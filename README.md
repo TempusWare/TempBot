@@ -7,6 +7,7 @@ Get a word to unscramble. (All words are based off Marvel-related things)\
 *Alias(es):* `unscram` `unscr`\
 **Subcommands:**
 - hint
+- dm
 ##### /numberguess
 Guess a number from 1-10.\
 *Alias(es):* `numg` `numguess`\

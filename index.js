@@ -3,7 +3,7 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("Scissors Paper Rock");
+  client.user.setActivity("Hangman");
 });
 
 client.login(process.env.BOT_TOKEN);
@@ -38,9 +38,21 @@ client.on("message", async message => {
 			};
 		} else { // Word responses
 			// UNSCRAMBLE game
-			if (games.unscramble.hasOwnProperty(messageChannel) && messageContent.toLowerCase().includes(games.unscramble[messageChannel])) {
-				message.reply(`You got the word! The word was ${games.unscramble[messageChannel]}.`);
-				delete games.unscramble[messageChannel];
+			if (games.unscramble.servers.hasOwnProperty(messageChannel) && messageContent.toLowerCase().includes(games.unscramble.servers[messageChannel])) {
+				message.reply(`You got the word! The word was **${games.unscramble.servers[messageChannel]}**.`);
+				delete games.unscramble.servers[messageChannel];
+			};
+			if (games.unscramble.hosts.hasOwnProperty(player)) {
+				var word = messageContent.toLowerCase();
+				const server = games.unscramble.hosts[player], gameChannel = client.channels.get(server);
+				if (games.unscramble.servers.hasOwnProperty[server]) {
+					message.reply("A game of unscramble has already been started in that server!");
+				} else {
+					games.unscramble.servers[server] = word.toLowerCase();
+					message.reply("The word you have chosen is " + word.emoticonvert());
+					gameChannel.send(`Unscramble this: ${games.unscramble.servers[server].shuffle()}`);
+				};
+				delete games.unscramble.hosts[player];
 			};
 			// SCISSORS PAPER ROCK game
 			if (games.scissorspaperrock.hasOwnProperty(player)) {
@@ -138,18 +150,25 @@ client.on("message", async message => {
 				break;
 
 			case "unscramble": case "unscram": case "unscr":
-				var gameRunning = games.unscramble.hasOwnProperty(messageChannel);
+				var gameRunning = games.unscramble.servers.hasOwnProperty(messageChannel);
 				if (!gameRunning) {
-					if (args[1]) {message.reply(reusedMessages.notplaying); return};
-					games.unscramble[messageChannel] = words[Math.round(Math.random() * words.length)];
-					message.channel.send(`Unscramble this: ${games.unscramble[messageChannel].shuffle()}`);
+					if (args[1] && args[1] != "dm") {message.reply(reusedMessages.notplaying); return};
+					if (args[1] && args[1] === "dm") {
+						games.unscramble.hosts[authorId] = messageChannel;
+
+						message.reply("DM me the word.");
+						message.author.send(`You are preparing a game of unscramble in **${message.channel.name}**. What's the word?`);
+					} else {
+						games.unscramble.servers[messageChannel] = words[Math.round(Math.random() * words.length)];
+						message.channel.send(`Unscramble this: ${games.unscramble.servers[messageChannel].shuffle()}`);
+					};
 				} else {
 					if (args[1] && args[1].toLowerCase() === "hint") {
-						message.channel.send(`Rescrambled: ${games.unscramble[messageChannel].shuffle()}`);
+						message.channel.send(`Rescrambled: ${games.unscramble.servers[messageChannel].shuffle()}`);
 					} else if (args[1]) {
 						message.reply(reusedMessages.invalidcommand);
 					} else {
-						message.reply(reusedMessages.notplaying);
+						message.reply(reusedMessages.alreadyplaying);
 					};
 				};
 				break;
@@ -328,10 +347,21 @@ client.on("message", async message => {
 				if (!args[1]) {message.reply(reusedMessages.noarguments); return};
 
 				switch (args[1].toLowerCase()) {
-					case "unscramble": case "numberguess": case "mathsquestion":
-						if (games[args[1].toLowerCase()].hasOwnProperty(message.channel.id)) {
-							message.channel.send(`**${args[1].toUpperCase()}** game ended. The answer was **${games[args[1].toLowerCase()][message.channel.id]}**.`);
-							delete games[args[1].toLowerCase()][message.channel.id];
+					case "numberguess": case "mathsquestion":
+						if (games[args[1].toLowerCase()].hasOwnProperty(messageChannel)) {
+							message.channel.send(`**${args[1].toUpperCase()}** game ended. The answer was **${games[args[1].toLowerCase()][messageChannel]}**.`);
+							delete games[args[1].toLowerCase()][messageChannel];
+						} else {
+							message.reply("There's no game of that type running in this server!");
+						};
+						break;
+					case "unscramble":
+						if (games.unscramble.servers.hasOwnProperty(messageChannel)) {
+							message.channel.send(`**UNSCRAMBLE** game ended. The word was **${games.unscramble.servers[messageChannel]}**.`);
+							delete games.unscramble.servers[messageChannel];
+						} else if (games.unscramble.hosts.hasOwnProperty(messageAuthor)) {
+							message.reply("Your game of unscramble was cancelled.");
+							delete games.unscramble.hosts[messageAuthor];
 						} else {
 							message.reply("There's no game of that type running in this server!");
 						};
@@ -454,7 +484,7 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 				hangmanStages = ["https://cdn.discordapp.com/attachments/595019294383800320/608604818528796673/tempbot-hangman-0.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604827966111764/tempbot-hangman-1.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604826200309761/tempbot-hangman-2.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604824803606529/tempbot-hangman-3.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604823197319178/tempbot-hangman-4.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604821796159508/tempbot-hangman-5.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604820349124609/tempbot-hangman-6.jpg"];
 
 var games = {
-	unscramble: {},
+	unscramble: {servers: {}, hosts: {}},
 	numberguess: {},
 	mathsquestion: {},
 	scissorspaperrock: {},
