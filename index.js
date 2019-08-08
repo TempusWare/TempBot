@@ -323,10 +323,10 @@ client.on("message", async message => {
 			case "rockpaperscissors": case "scissorspaperrock": case "rps": case "spr": case "handgame":
 				if (games.scissorspaperrock.hasOwnProperty(messageAuthor)) {message.reply(`You're already in a game of scissors-paper-rock with ${games.scissorspaperrock[games.scissorspaperrock[player]["opponent"]]["tag"]}!`); return};
 				if (!message.mentions.users.size) {message.reply("No one was mentioned."); return};
-				var taggedId = message.mentions.users.first().id;
+				var tagged = message.mentions.users.first(), taggedId = tagged.id;
 				console.log(authorId + " " + taggedId)
 				if (authorId === taggedId) {message.reply("You can't challenge yourself!"); return};
-				if (taggedId === testbot || taggedId === tempbot) {message.reply("You can't challenge me!"); return};
+				if (tagged.bot) {message.reply("You can't challenge bots!"); return};
 				if (games.scissorspaperrock.hasOwnProperty(taggedId)) {message.reply(`${message.mentions.users.first()} is already in a game of scissors-paper-rock!`); return};
 
 				games.scissorspaperrock[authorId] = new Object();
@@ -336,7 +336,7 @@ client.on("message", async message => {
 				games.scissorspaperrock[authorId].channel = message.channel.id;
 				games.scissorspaperrock[taggedId].channel = message.channel.id;
 				games.scissorspaperrock[authorId].tag = message.author;
-				games.scissorspaperrock[taggedId].tag = message.mentions.users.first();
+				games.scissorspaperrock[taggedId].tag = tagged;
 
 				message.channel.send(`A game of scissors-paper-rock with ${games.scissorspaperrock[authorId].tag} and ${games.scissorspaperrock[taggedId].tag} has been started. Direct message me **scissors**, **paper** or **rock**.`);
 				message.author.send(`You have started a game of scissors-paper-rock with ${games.scissorspaperrock[taggedId].tag} (${games.scissorspaperrock[taggedId].tag.username}). What do you choose? You can choose from **scissors**, **paper** and **rock**.`);
