@@ -3,7 +3,7 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("Hangman");
+  client.user.setActivity("My -> button broke");
 });
 
 client.login(process.env.BOT_TOKEN);
