@@ -3,7 +3,7 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("My -> button broke");
+  client.user.setActivity("society");
 });
 
 client.login(process.env.BOT_TOKEN);
@@ -145,8 +145,8 @@ client.on("message", async message => {
 				message.reply("Ping!");
 				break;
 
-			case "help":
-				message.reply("https://github.com/TempusWare/TempBot19/blob/master/README.md");
+			case "help": case "games":
+				message.reply("Commands:\n/unscramble\n/numberguess\n/mathsquestion\n/scissorspaperrock\n/hangman\n/endgame\nhttps://github.com/TempusWare/TempBot19/blob/master/README.md");
 				break;
 
 			case "unscramble": case "unscram": case "unscr":
@@ -154,6 +154,7 @@ client.on("message", async message => {
 				if (!gameRunning) {
 					if (args[1] && args[1] != "dm") {message.reply(reusedMessages.notplaying); return};
 					if (args[1] && args[1] === "dm") {
+						if (message.channel.type === "dm") {message.reply(reusedMessages.cantDM); return};
 						games.unscramble.hosts[authorId] = messageChannel;
 
 						message.reply("DM me the word.");
@@ -390,8 +391,9 @@ client.on("message", async message => {
 				break;
 
 			case "hangman":
-				var gameRunning = games.hangman.hasOwnProperty(messageChannel);
+				var gameRunning = games.hangman.servers.hasOwnProperty(messageChannel);
 				if (gameRunning) {message.reply(reusedMessages.alreadyplaying); return};
+				if (message.channel.type === "dm") {message.reply(reusedMessages.cantDM); return};
 
 				games.hangman.servers[messageChannel] = new Object();
 				games.hangman.hosts[authorId] = messageChannel;
@@ -492,6 +494,7 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 					notplaying: "There's no game of this type running in this server!",
 					notinagame: "You're not in a game!",
 					noarguments: "You didn't add a subcommand / Not enough arguments!",
+					cantDM: "This game can't be played in a DM.",
 					},
 				words = ["marvel","stark","groot","inevitable","infinity","endgame","ragnarok","homecoming","iron man","captain america","hulk","thor","black widow","hawkeye","nick fury","spider-man","guardians","galaxy","thanos","gauntlet"],
 				responses = ["Definitely not. (Captain Marvel 77:18)","Definitely not. (Doctor Strange 11:22)","No. Definitely not. (III Captain America 58:37)","Probably. Yeah. (II Iron Man 52:12)","Probably not, to be honest. (III Thor 123:05)","Absolutely. (I Ant-Man 44:24)","Absolutely not! (I Ant-Man 47:08)","No. No, absolutely not. (I Iron Man 59:10)","Absolutely, we're... I'm going to have to call you back. (I Iron Man 95:04)","Absolutely. (II Iron Man 11:30)","Absolutely. (II Iron Man 80:08)","Absolutely. (III Avengers 72:08)","Yes, my son. (Black Panther 0:07)","Yes, General. (Black Panther 14:10)","For now, yes. (Doctor Strange 52:24)","The answer is yes. (Doctor Strange 76:22)","Oh, yes. Promptly. (Doctor Strange 107:24)","Yes, ma'am. (II Avengers 40:35)","That is not possible. (Black Panther 64:32)","Experimental and expensive, but possible. (Doctor Strange 14:30)","It's impossible. (I Guardians of the Galaxy 78:11)","Oh, I don't doubt it. (III Iron Man 51:49)","We have no idea (Captain Marvel 111:44)","I've got no idea. (I Iron Man 81:19)","I'm not sure. (I Spider-Man 54:57)","I'm not sure. (II Ant-Man 14:08)","Not sure. I'm working on it. (III Avengers 17:53)","With all due respect, I'm not sure the science really supports that. (IV Avengers 83:46)","I'm not sure. (III Thor 120:11)","I'm not sure. (IV Avengers 161:15)","I don't know. (Captain Marvel 60:58)","I don't know. I hadn't gotten to that part yet. (Doctor Strange 51:38)","I don't know. (Doctor Strange 67:59)"],
