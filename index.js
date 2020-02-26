@@ -3,13 +3,15 @@ const client = new Discord.Client();
 
 client.once("ready", () => {
 	console.log("Ready!");
-  client.user.setActivity("society");
+  client.user.setActivity("/games");
 });
 
 client.login(process.env.BOT_TOKEN);
 
+
 client.on("message", async message => {
-  if (message.author.bot) {return};
+	if (message.author.bot) {return};
+	{
 	var 	messageContent = message.content,
 				args = messageContent.substr(prefix.length, messageContent.length).split(delimiter),
 				messageChannel = message.channel.id,
@@ -30,11 +32,6 @@ client.on("message", async message => {
 				} else if (guess < number) {
 					message.reply("Higher!");
 				};
-			};
-			// MATHS QUESTION game
-			if (games.mathsquestion.hasOwnProperty(messageChannel) && messageContent == games.mathsquestion[messageChannel]) {
-				message.reply(`You got the correct answer! The answer was ${games.mathsquestion[messageChannel]}.`);
-				delete games.mathsquestion[messageChannel];
 			};
 		} else { // Word responses
 			// UNSCRAMBLE game
@@ -89,48 +86,6 @@ client.on("message", async message => {
 				message.reply("Check the text-channel the game was started in.");
 				opponentTag.send("Check the text-channel the game was started in.");
 			};
-			// HANGMAN game
-			if (games.hangman.hosts.hasOwnProperty(player)) { // Host providing the word
-				var word = messageContent.toLowerCase();
-				if (!lettersAll.test(word)) {message.reply("Only letters are accepted."); return};
-
-				var server = games.hangman.hosts[authorId];
-
-				games.hangman.servers[server].word = word;
-				games.hangman.servers[server].stage = 0;
-
-				message.reply("The word you have chosen is " + word.emoticonvert());
-
-				client.channels.get(server).send(`A game of hangman has been started by ${message.author}. Guess the word!\n${word.hangmanconvert()}`, {files: [hangmanStages[0]]});
-
-				delete games.hangman.hosts[authorId];
-			};
-			if (games.hangman.servers.hasOwnProperty(messageChannel)) { // Guessing a letter in the word
-				var word = games.hangman.servers[messageChannel].word;
-				var guess = messageContent.toLowerCase();
-				if (guess.length == 1 && letters.test(guess)) {
-					if (word.includes(guess)) {
-						games.hangman.servers[messageChannel].word = word.replace(new RegExp(guess, "g"), guess.toUpperCase());
-						message.channel.send(`The word has ${guess.emoticonvert()} as guessed by ${message.author}\n${games.hangman.servers[messageChannel].word.hangmanconvert()}`);
-
-						if (lettersHigh.test(games.hangman.servers[messageChannel].word)) {
-							message.channel.send("The entire word has been uncovered! :checkered_flag:");
-							delete games.hangman.servers[messageChannel];
-						};
-					} else {
-						games.hangman.servers[messageChannel].stage++;
-						if (games.hangman.servers[messageChannel].stage < 6) {
-							message.channel.send(`The word does not have ${guess.emoticonvert()} as guessed by ${message.author}`, {files: [hangmanStages[games.hangman.servers[messageChannel].stage]]})
-						} else {
-							message.channel.send(`The word does not have ${guess.emoticonvert()} as guessed by ${message.author}\nThe word was ${games.hangman.servers[messageChannel].word.emoticonvert()} Game over!`, {files: [hangmanStages[6]]});
-							delete games.hangman.servers[messageChannel];
-						};
-					};
-				} else if (guess === word.toLowerCase()) { // Guessing the whole word
-					message.channel.send(`The whole word has been guessed correctly by ${message.author} :checkered_flag:\nThe word was ${word.emoticonvert()}`);
-					delete games.hangman.servers[messageChannel];
-				};
-			};
 		};
 	};
 
@@ -141,14 +96,6 @@ client.on("message", async message => {
 		console.log(message.author.tag + ": " + args + " (" + messageContent + ")");
 
 		switch (args[0].toLowerCase()) {
-			case "ping":
-				message.reply("Ping!");
-				break;
-
-			case "help": case "games":
-				message.reply("Commands:\n/unscramble\n/numberguess\n/mathsquestion\n/scissorspaperrock\n/hangman\n/endgame\nhttps://github.com/TempusWare/TempBot19/blob/master/README.md");
-				break;
-
 			case "unscramble": case "unscram": case "unscr":
 				var gameRunning = games.unscramble.servers.hasOwnProperty(messageChannel);
 				if (!gameRunning) {
@@ -174,7 +121,7 @@ client.on("message", async message => {
 				};
 				break;
 
-			case "numberguess": case "numg": case "numguess":
+			case "numberguess": case "numg": case "numguess": case "guess":
 				var gameRunning = games.numberguess.hasOwnProperty(messageChannel);
 				if (!gameRunning) {
 					if (!isNaN(args[1])) {
@@ -199,54 +146,6 @@ client.on("message", async message => {
 			case "8ball":
 				if (!args[1]) {message.reply("Ask something!"); return};
 				message.reply(responses[Math.floor(Math.random() * responses.length)]);
-				break;
-
-			case "mathsquestion": case "maths":
-				var gameRunning = games.mathsquestion.hasOwnProperty(messageChannel);
-				if (gameRunning) {message.reply(reusedMessages.alreadyplaying); return};
-
-				var range = 64, questionType = mathsTypes[Math.round(Math.random() * mathsTypes.length)];
-				if (args[1]) {
-					if (isNaN(args[1])) {
-						questionType = args[1].toLowerCase();
-					} else {
-						range = args[1];
-					};
-				};
-				if (args[2]) {
-					if (isNaN(args[2])) {
-						questionType = args[2].toLowerCase();
-					} else {
-						range = args[2];
-					};
-				};
-				var numberA = Math.round(Math.random() * range), numberB = Math.round(Math.random() * range);
-				console.log(numberA + " " + numberB + " " + range)
-				switch (questionType) {
-					case "addition": case "add":
-						games.mathsquestion[messageChannel] = numberA + numberB;
-						message.channel.send(`What is **${numberA}** + **${numberB}** = ?`);
-						break;
-					case "subtraction": case "sub":
-						games.mathsquestion[messageChannel] = numberA - numberB;
-						message.channel.send(`What is **${numberA}** - **${numberB}** = ?`);
-						break;
-					case "multiplication": case "mul":
-						games.mathsquestion[messageChannel] = numberA * numberB;
-						message.channel.send(`What is **${numberA}** x **${numberB}** = ?`);
-						break;
-					case "division": case "div":
-						while (numberA % numberB != 0 || numberB == 1) {
-							numberA = Math.floor((Math.random() * range) + 1);
-							numberB = Math.floor((Math.random() * range) + 1);
-						};
-						games.mathsquestion[messageChannel] = numberA / numberB;
-						message.channel.send(`What is **${numberA}** / **${numberB}** = ?`);
-						break;
-					default:
-						message.reply(reusedMessages.invalidcommand);
-					};
-
 				break;
 
 			case "illiterate": case "ilr":
@@ -348,10 +247,10 @@ client.on("message", async message => {
 				if (!args[1]) {message.reply(reusedMessages.noarguments); return};
 
 				switch (args[1].toLowerCase()) {
-					case "numberguess": case "mathsquestion":
-						if (games[args[1].toLowerCase()].hasOwnProperty(messageChannel)) {
-							message.channel.send(`**${args[1].toUpperCase()}** game ended. The answer was **${games[args[1].toLowerCase()][messageChannel]}**.`);
-							delete games[args[1].toLowerCase()][messageChannel];
+					case "numberguess": case "guess":
+						if (games.numberguess.hasOwnProperty(messageChannel)) {
+							message.channel.send(`**Number guessing** game ended. The answer was **${games.numberguess[messageChannel]}**.`);
+							delete games.numberguess[messageChannel];
 						} else {
 							message.reply("There's no game of that type running in this server!");
 						};
@@ -385,21 +284,12 @@ client.on("message", async message => {
 						};
 						delete games.hangman.servers[messageChannel];
 						break;
+					case "maths": case "algebra":
+						message.reply(`Games of ${args[1].toLowerCase()} will end automatically.`);
+						break;
 					default:
 						message.reply("That's not a game I have.")
 				};
-				break;
-
-			case "hangman":
-				var gameRunning = games.hangman.servers.hasOwnProperty(messageChannel);
-				if (gameRunning) {message.reply(reusedMessages.alreadyplaying); return};
-				if (message.channel.type === "dm") {message.reply(reusedMessages.cantDM); return};
-
-				games.hangman.servers[messageChannel] = new Object();
-				games.hangman.hosts[authorId] = messageChannel;
-
-				message.reply("DM me the word.");
-				message.author.send(`You have started a game of hangman in **${message.channel.name}**. What's the word?`);
 				break;
 
 			case "avatar":
@@ -422,8 +312,497 @@ client.on("message", async message => {
 				break;
 
 			default:
-				message.reply(reusedMessages.invalidcommand);
+				//message.reply(reusedMessages.invalidcommand);
 				break;
+		};
+	};
+	}
+	// Commands
+	if (message.content.startsWith(prefix)) {
+		var args = message.content.substr(prefix.length, message.content.length).split(delimiter);
+
+		switch (args[0].toLowerCase()) {
+
+			case "ping":
+				message.reply("Pong! :ping_pong:")
+				break;
+
+			case "debug":
+				if (message.author.id != tempus) {message.reply("You don't have permission to use this command."); return};
+				console.log(games);
+				console.log(servers);
+				break;
+
+			case "games": case "help":
+				message.channel.send(tempbotEmbed)
+				break;
+
+			case "hangman":
+				// Error handling: Currently running game
+				if (gameRunning()) {return};
+
+				// Error handling: Don't allow DM games
+				if (message.channel.type === "dm") {message.reply("This game can't be played in a direct message."); return};
+
+				// Initialise game data
+				servers[message.channel.id] = "hangman";
+				games.hangman.servers[message.channel.id] = new Object();
+				games.hangman.hosts[message.author.id] = message.channel.id;
+
+				// Use all-or-nothing gamemode
+				if (args.length >= 2 && args[1] === "risk") {
+					games.hangman.servers[message.channel.id].risk = true;
+				} else {
+					games.hangman.servers[message.channel.id].risk = false;
+				};
+
+				// Schedule cancellation
+				setTimeout(() => cancelHangmanHost(message.channel.id, message.author.id), 1000 * gametime.hangmanHost);
+				
+				// Send messages
+				message.reply("DM me the word.");
+				message.author.send(`You have started a game of hangman in the **#${message.channel.name}** text-channel in **${message.guild.name}**.\nWhat's the word?`);
+				break;
+
+			case "maths":
+				// Error handling: Currently running game
+				if (gameRunning()) {return};
+
+				// Get difficulty
+				if (args.length >= 2) {
+					// If the subcommand is a number, greater than or equal to 1 and less than or equal to 5
+					if (!isNaN(args[1]) && args[1] >= 1 && args[1] <= 5) {
+						var difficulty = Number(args[1]);
+					}
+					// Otherwise
+					else {
+						message.reply("That's not a valid difficulty level. Choose a level from 1-5.");
+						return;
+					};
+				} else {
+					var difficulty = 1;
+				};
+
+				// Generate variables
+				switch (difficulty) {
+					case 1:
+						var numA = Math.round(Math.random() * 13);
+						var numB = Math.round(Math.random() * 13);
+						break;
+					case 2:
+						var numA = Math.round(Math.random() * 145);
+						var numB = Math.round(Math.random() * 13);
+						break;
+					case 3:
+						var numA = Math.round(Math.random() * 145);
+						var numB = Math.round(Math.random() * 145);
+						break;
+					case 4:
+						var numA = Math.round(Math.random() * 1729);
+						var numB = Math.round(Math.random() * 145);
+						break;
+					case 5:
+						var numA = Math.round(Math.random() * 1729);
+						var numB = Math.round(Math.random() * 1729);
+						break;
+					default:
+						break;
+				};
+				var answer;
+				var compose = ``;
+				var emoji;
+
+				// Choose question type from random
+				var type = mathsTypes[Math.round(Math.random() * 3)];
+
+				// Set out question
+				switch (type) {
+					case "+":
+						answer = numA + numB;
+						break;
+
+					case "-":
+						answer = numA - numB;
+						break;
+
+					case "x":
+						answer = numA * numB;
+						break;
+
+					case "/":
+						answer = Math.round(numA / numB);
+						break;
+				
+					default:
+						break;
+				};
+
+				// Initialise game data
+				servers[message.channel.id] = "maths";
+
+				// Add to/Subtract from the answer to make a close but wrong number
+				Number.prototype.vary = function () {
+					let sign = Math.round(Math.random());
+					let range = Math.floor(Math.random() * (answer / 2));
+					let newNum = (sign == 1) ? this + range : this - range;
+					return newNum;
+				};
+
+				compose += `What is **${numA} ${type} ${numB}**?`;
+
+				// Add note about rounding if the question type is division
+				if (type === "/") {
+					compose += ` (Round to the nearest integer)`;
+				};
+
+				// Create wrong multiple-choice answers // Inspired by https://stackoverflow.com/a/41147010
+				var choices = [];
+				var index = Math.floor(Math.random() * 4);
+				for (let i = 0; i < 4; i++) {
+					if (i == index) {
+						choices.push(answer);
+					} else {
+						let genNum = answer.vary();
+						while (choices.includes(genNum) || genNum == answer) {
+							genNum++
+						};
+						choices.push(genNum);
+					};
+				};
+				compose += `\n1️⃣**) ${choices[0]}  |  2️⃣) ${choices[1]}  |  3️⃣) ${choices[2]}  |  4️⃣) ${choices[3]}**`;
+
+				switch (index) {
+					case 0:
+						emoji = "1️⃣";
+						break;
+					case 1:
+						emoji = "2️⃣";
+						break;
+					case 2:
+						emoji = "3️⃣";
+						break;
+					case 3:
+						emoji = "4️⃣";
+						break;
+					default:
+						break;
+				};
+
+				// Send message and add reactions for multiple-choice
+				message.channel.send(compose)
+				.then(async function (message) {
+
+					await message.react("1️⃣");
+					await message.react("2️⃣");
+					await message.react("3️⃣");
+					await message.react("4️⃣");
+
+					const filter = (reaction, user) => {
+						return reaction.emoji.name === emoji && user.id != tempbot && user.id != testbot;
+					};
+
+					const collector = message.createReactionCollector(filter, {time: 1000 * gametime.maths});
+
+					/*collector.on("collect", (reaction, reactionCollector) => {
+					});*/
+
+					collector.on("end", collected => {
+
+						// If no one correctly answered
+						if (collected.size == 0) {
+							message.channel.send(`:timer: No one got the answer in time. The correct answer was ${emoji}**) ${answer}**`);
+						}
+						// If otherwise
+						else {
+							let winners = collected.get(emoji).users;
+
+							// Delete TempBot/TestBot key
+							if (winners.has(tempbot)) {winners.delete(tempbot)};
+							if (winners.has(testbot)) {winners.delete(testbot)};
+
+							// Send congratulations message
+							let compose2 = `:trophy: Congratulations to `;
+							winners.forEach(function (key) {
+								compose2 += `${key} `;
+							});
+							compose2 += `for getting the correct answer: ${emoji}**) ${answer}**`;
+							message.channel.send(compose2);
+						};
+
+						// Delete game data
+						delete servers[message.channel.id];
+						
+					});
+				});
+				break;
+
+			case "algebra":
+				// Error handling: Currently running game
+				if (gameRunning()) {return};
+
+				// Generate variables
+				do {
+					var numA = Math.round(Math.random() * 13);
+				} while (numA == 0); // Can't be 0
+				var numB = Math.round(Math.random() * 13);
+				var answer = Math.round(Math.random() * 13);
+				var posOrNeg = Math.round(Math.random());
+				var numC = (posOrNeg == 1) ? numA * answer + numB : numA * answer - numB;
+				var strSign = (posOrNeg == 1) ? "+" : "-";
+				var compose = ``;
+				var emoji;
+
+				// Initialise game data
+				servers[message.channel.id] = "algebra";
+
+				// Add to/Subtract from the answer to make a close but wrong number
+				Number.prototype.vary = function () {
+					let sign = Math.round(Math.random());
+					let range = Math.floor(Math.random() * (answer / 2));
+					let newNum = (sign == 1) ? this + range : this - range;
+					return newNum;
+				};
+
+				compose += `Solve for x: **${numA}x ${strSign} ${numB} = ${numC}**`;
+
+				// Create wrong multiple-choice answers // Inspired by https://stackoverflow.com/a/41147010
+				var choices = [];
+				var index = Math.floor(Math.random() * 4);
+				for (let i = 0; i < 4; i++) {
+					if (i == index) {
+						choices.push(answer);
+					} else {
+						let genNum = answer.vary();
+						while (choices.includes(genNum) || genNum == answer) {
+							genNum++
+						};
+						choices.push(genNum);
+					};
+				};
+				compose += `\n1️⃣**) ${choices[0]}  |  2️⃣) ${choices[1]}  |  3️⃣) ${choices[2]}  |  4️⃣) ${choices[3]}**`;
+
+				switch (index) {
+					case 0:
+						emoji = "1️⃣";
+						break;
+					case 1:
+						emoji = "2️⃣";
+						break;
+					case 2:
+						emoji = "3️⃣";
+						break;
+					case 3:
+						emoji = "4️⃣";
+						break;
+					default:
+						break;
+				};
+
+				// Send message and add reactions for multiple-choice
+				message.channel.send(compose)
+				.then(async function (message) {
+
+					await message.react("1️⃣");
+					await message.react("2️⃣");
+					await message.react("3️⃣");
+					await message.react("4️⃣");
+
+					const filter = (reaction, user) => {
+						return reaction.emoji.name === emoji && user.id != tempbot && user.id != testbot;
+					};
+
+					const collector = message.createReactionCollector(filter, {time: 1000 * gametime.algebra});
+
+					collector.on("end", collected => {
+
+						// If no one correctly answered
+						if (collected.size == 0) {
+							message.channel.send(`:timer: No one got the answer in time. The correct answer was ${emoji}**) ${answer}**`);
+						}
+						// If otherwise
+						else {
+							let winners = collected.get(emoji).users;
+
+							// Delete TempBot/TestBot key
+							if (winners.has(tempbot)) {winners.delete(tempbot)};
+							if (winners.has(testbot)) {winners.delete(testbot)};
+
+							// Send congratulations message
+							let compose2 = `:trophy: Congratulations to `;
+							winners.forEach(function (key) {
+								compose2 += `${key} `;
+							});
+							compose2 += `for getting the correct answer: ${emoji}**) ${answer}**`;
+							message.channel.send(compose2);
+						};
+
+						// Delete game data
+						delete servers[message.channel.id];
+						
+					});
+				});
+				break;
+		
+			default:
+				//message.reply("That's not a valid command.");
+				break;
+		};
+
+		function gameRunning() {
+			if (servers.hasOwnProperty(message.channel.id)) {
+				let game = servers[message.channel.id];
+				message.reply("There's a game of **" + game + "** playing in this chat already. Use **/endgame " + game + "** to stop it.");
+				return true;
+			} else {
+				return false;
+			};
+		};
+
+		return;
+	}
+	// Responses
+	else {
+		// Hangman: Host direct messaging the chosen word
+		if (games.hangman.hosts.hasOwnProperty(message.author.id) && (message.channel.type === "dm")) {
+			let word = message.content.toLowerCase();
+			
+			// Accept if the word contains only letters
+			if (!lettersAll.test(word)) {
+				message.reply("Words/Phrases can only contain letters and spaces.");
+				return;
+			};
+
+			let server = games.hangman.hosts[message.author.id];
+
+			// Insert game data
+			games.hangman.servers[server].word = word; // Original word
+			games.hangman.servers[server].echo = word; // Editable copy
+			games.hangman.servers[server].stage = 0;
+			games.hangman.servers[server].guessed = "";
+
+			message.reply("The word/phrase you have chosen is " + word.emoticonvert());
+
+			client.channels.get(server).send(`A game of hangman has been started by ${message.author}. Guess the word/phrase!\n${word.hangmanconvert()}`, {files: [hangmanStages[0]]});
+
+			delete games.hangman.hosts[message.author.id];
+
+			// Schedule cancellation
+			setTimeout(() => cancelHangman(server, word), 1000 * gametime.hangman);
+
+			return;
+		};
+		
+		// Player's responses to a game
+		if (servers.hasOwnProperty(message.channel.id)) {
+			switch (servers[message.channel.id]) {
+
+				// Hangman: Guessing a letter
+				case "hangman":
+					// Get game data
+					var game = games.hangman.servers[message.channel.id];
+					let guess = message.content.toLowerCase();
+
+					// Initialise response message
+					let response = ``;
+					let doPrint = false;
+					let postStage = false;
+
+					// Check if guess is a single character and a letter
+					if (guess.length == 1 && letters.test(guess)) {
+
+						// Check if word includes guessed letter
+						if (game.echo.includes(guess)) {
+
+							// Capitalise guessed letter in word (simulates a filled in letter)
+							game.echo = game.echo.replace(new RegExp(guess, "g"), guess.toUpperCase());
+							
+							// Add 'letter add' message to response
+							response += `The word has ${guess.emoticonvert()} as guessed by ${message.author}\n${game.echo.hangmanconvert()}`;
+
+							// Check if word is completely filled out
+							if (lettersHigh.test(game.echo)) {
+								response += `\nThe entire word has been uncovered! :checkered_flag:`;
+								delete servers[message.channel.id];
+								delete games.hangman.servers[message.channel.id];
+							}
+							// If not, show the guessed letters
+							else {
+								response += `\n${game.guessed.emoticonvert()}`;
+							};
+
+						}
+						// Check if guessed letter has already been guessed and is wrong
+						else if (game.guessed.includes(guess)) {
+							response += `That letter has already been guessed!\n${game.guessed.emoticonvert()}`;
+						}
+						// Check if guessed letter has already been guessed and is correct/filled
+						else if (game.echo.includes(guess.toUpperCase())) {
+							response += `That letter has already been added!\n${game.echo.hangmanconvert()}`;
+						}
+						// If the word does not have the guessed letter
+						else {
+							// Move up a stage
+							game.stage++;
+
+							// Add guessed letter to crossed out words
+							game.guessed += guess;
+
+							response += `The word does not have ${guess.emoticonvert()} as guessed by ${message.author}`;
+
+							// Check if the game has not reached the final stage
+							if (game.stage < 6) {
+								response += `\n${game.echo.hangmanconvert()}\n${game.guessed.emoticonvert()}`;
+							}
+							// If the game has no more stages
+							else {
+								response += `\nThe word was ${game.word.emoticonvert()}\nGame over! :pirate_flag:`;
+								delete servers[message.channel.id];
+								delete games.hangman.servers[message.channel.id];
+							};
+							postStage = true;
+						};
+						doPrint = true;
+					}
+					// Check if all-or-nothing is enabled, if not: Move up a stage
+					else if (game.risk && guess != game.word) {
+						// Move up a stage
+						game.stage++;
+
+						response += `The word was NOT ${guess.emoticonvert()} as guessed by ${message.author}`;
+
+						// Check if the game has not reached the final stage
+						if (game.stage < 6) {
+							response += `\n${game.guessed.emoticonvert()}`;
+						}
+						// If the game has no more stages
+						else {
+							response += `\nThe word was ${game.word.emoticonvert()}\nGame over! :pirate_flag:`;
+							delete servers[message.channel.id];
+							delete games.hangman.servers[message.channel.id];
+						};
+						doPrint = true;
+						postStage = true;
+					}
+					// Check if the guessed word is correct
+					else if (guess === game.word) {
+						response += `The whole word has been guessed correctly by ${message.author} :checkered_flag:\nThe word was ${game.word.emoticonvert()}`;
+						delete servers[message.channel.id];
+						delete games.hangman.servers[message.channel.id];
+						doPrint = true;
+					};
+
+					// Send complete response
+					if (doPrint && postStage) {
+						message.channel.send(response, {files: [hangmanStages[game.stage]]});
+					} else if (doPrint) {
+						message.channel.send(response);
+					};
+					break;
+			
+				default:
+					break;
+			};
+			return;
 		};
 	};
 
@@ -479,12 +858,43 @@ String.prototype.hangmanconvert = function () {
 		var emotext = og[i];
 		if (lettersLow.test(emotext)) {
 			emotext = "black_large_square";
+		} else if (emotext === " ") {
+			emotext = "white_small_square";
 		} else {
 			emotext = "regional_indicator_" + emotext.toLowerCase();
 		};
 		og[i] = ":" + emotext + ":";
 	};
 	return og.join(" ");
+};
+
+function cancelHangmanHost(server, host) {
+	
+	// Check if the server is still running hangman and it doesn't have a word selected
+	if (servers.hasOwnProperty(server) && servers[server] === "hangman" && !games.hangman.servers[server].hasOwnProperty("word")) {
+
+		// Select text-channel
+		client.channels.get(server).send(`The host has not chosen a word within ${gametime.hangman} seconds. The game of hangman has been cancelled.`);
+		
+		// Delete game data
+		delete servers[server];
+		delete games.hangman.servers[server];
+		delete games.hangman.hosts[host];
+	};
+};
+
+function cancelHangman(server, word) {
+	
+	// Check if the server is still running hangman and it's the same game (checked using the word)
+	if (servers.hasOwnProperty(server) && servers[server] === "hangman" && games.hangman.servers[server].word === word) {
+
+		// Select text-channel
+		client.channels.get(server).send(`No one got the word in time! The word was ${word.emoticonvert()}`);
+		
+		// Delete game data
+		delete servers[server];
+		delete games.hangman.servers[server];
+	};
 };
 
 const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "594473936943579166", tempbot = "563875158738206720",
@@ -496,20 +906,50 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 					noarguments: "You didn't add a subcommand / Not enough arguments!",
 					cantDM: "This game can't be played in a DM.",
 					},
-				words = ["marvel","stark","groot","inevitable","infinity","endgame","ragnarok","homecoming","iron man","captain america","hulk","thor","black widow","hawkeye","nick fury","spider-man","guardians","galaxy","thanos","gauntlet"],
-				responses = ["Definitely not. (Captain Marvel 77:18)","Definitely not. (Doctor Strange 11:22)","No. Definitely not. (III Captain America 58:37)","Probably. Yeah. (II Iron Man 52:12)","Probably not, to be honest. (III Thor 123:05)","Absolutely. (I Ant-Man 44:24)","Absolutely not! (I Ant-Man 47:08)","No. No, absolutely not. (I Iron Man 59:10)","Absolutely, we're... I'm going to have to call you back. (I Iron Man 95:04)","Absolutely. (II Iron Man 11:30)","Absolutely. (II Iron Man 80:08)","Absolutely. (III Avengers 72:08)","Yes, my son. (Black Panther 0:07)","Yes, General. (Black Panther 14:10)","For now, yes. (Doctor Strange 52:24)","The answer is yes. (Doctor Strange 76:22)","Oh, yes. Promptly. (Doctor Strange 107:24)","Yes, ma'am. (II Avengers 40:35)","That is not possible. (Black Panther 64:32)","Experimental and expensive, but possible. (Doctor Strange 14:30)","It's impossible. (I Guardians of the Galaxy 78:11)","Oh, I don't doubt it. (III Iron Man 51:49)","We have no idea (Captain Marvel 111:44)","I've got no idea. (I Iron Man 81:19)","I'm not sure. (I Spider-Man 54:57)","I'm not sure. (II Ant-Man 14:08)","Not sure. I'm working on it. (III Avengers 17:53)","With all due respect, I'm not sure the science really supports that. (IV Avengers 83:46)","I'm not sure. (III Thor 120:11)","I'm not sure. (IV Avengers 161:15)","I don't know. (Captain Marvel 60:58)","I don't know. I hadn't gotten to that part yet. (Doctor Strange 51:38)","I don't know. (Doctor Strange 67:59)"],
-				mathsTypes = ["addition", "subtraction", "multiplication", "division"],
-				letters = /^[a-zA-Z]/, lettersAll = /^[a-z]+$/, lettersLow = /^[a-z]/, lettersHigh = /^[A-Z]+$/,
+				gametime = {
+					hangman: 60 * 5,
+					hangmanHost: 30,
+					maths: 5,
+					algebra: 10,
+				},
+				//words = ["marvel","stark","groot","inevitable","infinity","endgame","ragnarok","homecoming","iron man","captain america","hulk","thor","black widow","hawkeye","nick fury","spider-man","guardians","galaxy","thanos","gauntlet"],
+				words = ["everything","basketball","characters","literature","perfection","volleyball","depression","homecoming","technology","maleficent","watermelon","appreciate","relaxation","convection","government","abominable","strawberry","retirement"],
+				//responses = ["Definitely not. (Captain Marvel 77:18)","Definitely not. (Doctor Strange 11:22)","No. Definitely not. (III Captain America 58:37)","Probably. Yeah. (II Iron Man 52:12)","Probably not, to be honest. (III Thor 123:05)","Absolutely. (I Ant-Man 44:24)","Absolutely not! (I Ant-Man 47:08)","No. No, absolutely not. (I Iron Man 59:10)","Absolutely, we're... I'm going to have to call you back. (I Iron Man 95:04)","Absolutely. (II Iron Man 11:30)","Absolutely. (II Iron Man 80:08)","Absolutely. (III Avengers 72:08)","Yes, my son. (Black Panther 0:07)","Yes, General. (Black Panther 14:10)","For now, yes. (Doctor Strange 52:24)","The answer is yes. (Doctor Strange 76:22)","Oh, yes. Promptly. (Doctor Strange 107:24)","Yes, ma'am. (II Avengers 40:35)","That is not possible. (Black Panther 64:32)","Experimental and expensive, but possible. (Doctor Strange 14:30)","It's impossible. (I Guardians of the Galaxy 78:11)","Oh, I don't doubt it. (III Iron Man 51:49)","We have no idea (Captain Marvel 111:44)","I've got no idea. (I Iron Man 81:19)","I'm not sure. (I Spider-Man 54:57)","I'm not sure. (II Ant-Man 14:08)","Not sure. I'm working on it. (III Avengers 17:53)","With all due respect, I'm not sure the science really supports that. (IV Avengers 83:46)","I'm not sure. (III Thor 120:11)","I'm not sure. (IV Avengers 161:15)","I don't know. (Captain Marvel 60:58)","I don't know. I hadn't gotten to that part yet. (Doctor Strange 51:38)","I don't know. (Doctor Strange 67:59)"],
+				responses = ["Yeah sure why not?","No doubt about it.","I mean it's possible.","Yeah nah I don't think so.","Ehhh, I'm not sure about that."],
+				mathsTypes = ["+", "-", "x", "/"],
+				letters = /^[a-zA-Z]/, lettersAll = /^[a-z]|\s/, lettersLow = /^[a-z]/, lettersHigh = /^[A-Z]+$/,
 				emoticonvertSpecials = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "keycap_ten"},
 				rpsChoices = ["rock", "paper", "scissors"],
 				rpsBeats = {scissors: "paper", paper: "rock", rock: "scissors"},
-				hangmanStages = ["https://cdn.discordapp.com/attachments/595019294383800320/608604818528796673/tempbot-hangman-0.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604827966111764/tempbot-hangman-1.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604826200309761/tempbot-hangman-2.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604824803606529/tempbot-hangman-3.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604823197319178/tempbot-hangman-4.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604821796159508/tempbot-hangman-5.jpg", "https://cdn.discordapp.com/attachments/595019294383800320/608604820349124609/tempbot-hangman-6.jpg"];
+				hangmanStages = [
+					"https://media.discordapp.net/attachments/563884324039163914/681659654287523872/tempbot-hangman-0.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659656086749225/tempbot-hangman-1.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659657663938640/tempbot-hangman-2.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659659870142464/tempbot-hangman-3.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659662021558278/tempbot-hangman-4.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659663363735561/tempbot-hangman-5.jpg",
+					"https://media.discordapp.net/attachments/563884324039163914/681659665033068591/tempbot-hangman-6.jpg",
+				];
 
 var games = {
 	unscramble: {servers: {}, hosts: {}},
-	numberguess: {},
-	mathsquestion: {},
+	numberguess: {servers: {}},
+	mathsquestion: {servers: {}},
+	maths: {servers: {}},
 	scissorspaperrock: {},
 	cardjitsu: {},
 	hangman: {servers: {}, hosts: {}},
 };
+
+var servers = {};
+
+const tempbotEmbed = new Discord.RichEmbed()
+tempbotEmbed.setAuthor("TempBot", "https://cdn.discordapp.com/attachments/563884324039163914/681447191633461273/tempbot-avatar-transparent.png", "https://www.078596.xyz")
+	.setColor("0x78F7FE")
+	.addField("/hangman", "Start a game of hangman with any word you choose. Use /hangman risk to penalise wrong word guesses.")
+	.addField("/maths", "Get a simple multiple-choice maths question to solve. Use /maths [difficulty (e.g. 2)] to increase the difficulty.")
+	.addField("/algebra", "Get a simple multiple-choice 'solve for x' algebra question to solve.")
+	.addField("/unscramble", "Get a word to unscramble. Use /unscramble dm to set a custom word. Use /unscramble hint to rescramble the word.")
+	.addField("/guess", "Guess a number from 1-10. Use /guess [range (e.g. 100)] to increase the range.")
+	.setFooter("Check out my website by clicking on 'TempBot'!", "https://cdn.discordapp.com/attachments/563884324039163914/681446253988675614/logo-clean-sd.png");
+	
