@@ -874,7 +874,7 @@ function cancelHangmanHost(server, host) {
 	if (servers.hasOwnProperty(server) && servers[server] === "hangman" && !games.hangman.servers[server].hasOwnProperty("word")) {
 
 		// Select text-channel
-		client.channels.get(server).send(`The host has not chosen a word within ${gametime.hangman} seconds. The game of hangman has been cancelled.`);
+		client.channels.get(server).send(`The host has not chosen a word within ${gametime.hangmanHost} seconds. The game of hangman has been cancelled.`);
 		
 		// Delete game data
 		delete servers[server];
