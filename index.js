@@ -8,7 +8,6 @@ client.once("ready", () => {
 
 client.login(process.env.BOT_TOKEN);
 
-
 client.on("message", async message => {
 	if (message.author.bot) {return};
 	{
@@ -660,6 +659,66 @@ client.on("message", async message => {
 					});
 				});
 				break;
+
+			case "mute": {
+				// If member has permission
+				if (!message.member.roles.some(role => role.name === modRole)) {
+					message.reply("You don't have permission! To use this command, you require the role: '" + modRole + "'.");
+					return;
+				};
+
+				if (!message.mentions.users.size) {
+					message.reply("You didn't tag anyone to mute!"); 
+					return;
+				};
+
+				// Get mute role
+				let role = message.guild.roles.find(role => role.name === mutedRole);
+		
+				if (role != null) {
+					let mutee = message.mentions.members.first();
+					if (mutee.roles.some(role => role.name === mutedRole)) {
+						message.reply("This user is already muted!");
+						return;
+					};
+					if (message.guild.me.hasPermission("MANAGE_ROLES")) {
+						mutee.addRole(role).catch(console.error);
+						message.reply("Successfully muted " + mutee.displayName);	
+					} else {
+						message.channel.send("Error: Attempted to mute user but I do not have role managing permissions.");
+					};
+				};
+			} break;
+
+			case "unmute": {
+				// If member has permission
+				if (!message.member.roles.some(role => role.name === modRole)) {
+					message.reply("You don't have permission! To use this command, you require the role: '" + modRole + "'.");
+					return;
+				};
+
+				if (!message.mentions.users.size) {
+					message.reply("You didn't tag anyone to unmute!"); 
+					return;
+				};
+
+				// Get mute role
+				let role = message.guild.roles.find(role => role.name === mutedRole);
+		
+				if (role != null) {
+					let mutee = message.mentions.members.first();
+					if (!mutee.roles.some(role => role.name === mutedRole)) {
+						message.reply("This user isn't muted!");
+						return;
+					};
+					if (message.guild.me.hasPermission("MANAGE_ROLES")) {
+						mutee.removeRole(role).catch(console.error);
+						message.reply("Successfully unmuted " + mutee.displayName);	
+					} else {
+						message.channel.send("Error: Attempted to unmute user but I do not have role managing permissions.");
+					};
+				};
+			} break;
 		
 			default:
 				//message.reply("That's not a valid command.");
@@ -931,6 +990,7 @@ const 	prefix = "/", delimiter = " ", tempus = "494030294723067904", testbot = "
 					algebra: 10,
 				},
 				antiRaidRole = "Anti-Raid", maxMentions = 3,
+				mutedRole = "Muted", modRole = "Moderator",
 				//words = ["marvel","stark","groot","inevitable","infinity","endgame","ragnarok","homecoming","iron man","captain america","hulk","thor","black widow","hawkeye","nick fury","spider-man","guardians","galaxy","thanos","gauntlet"],
 				words = ["everything","basketball","characters","literature","perfection","volleyball","depression","homecoming","technology","maleficent","watermelon","appreciate","relaxation","convection","government","abominable","strawberry","retirement"],
 				//responses = ["Definitely not. (Captain Marvel 77:18)","Definitely not. (Doctor Strange 11:22)","No. Definitely not. (III Captain America 58:37)","Probably. Yeah. (II Iron Man 52:12)","Probably not, to be honest. (III Thor 123:05)","Absolutely. (I Ant-Man 44:24)","Absolutely not! (I Ant-Man 47:08)","No. No, absolutely not. (I Iron Man 59:10)","Absolutely, we're... I'm going to have to call you back. (I Iron Man 95:04)","Absolutely. (II Iron Man 11:30)","Absolutely. (II Iron Man 80:08)","Absolutely. (III Avengers 72:08)","Yes, my son. (Black Panther 0:07)","Yes, General. (Black Panther 14:10)","For now, yes. (Doctor Strange 52:24)","The answer is yes. (Doctor Strange 76:22)","Oh, yes. Promptly. (Doctor Strange 107:24)","Yes, ma'am. (II Avengers 40:35)","That is not possible. (Black Panther 64:32)","Experimental and expensive, but possible. (Doctor Strange 14:30)","It's impossible. (I Guardians of the Galaxy 78:11)","Oh, I don't doubt it. (III Iron Man 51:49)","We have no idea (Captain Marvel 111:44)","I've got no idea. (I Iron Man 81:19)","I'm not sure. (I Spider-Man 54:57)","I'm not sure. (II Ant-Man 14:08)","Not sure. I'm working on it. (III Avengers 17:53)","With all due respect, I'm not sure the science really supports that. (IV Avengers 83:46)","I'm not sure. (III Thor 120:11)","I'm not sure. (IV Avengers 161:15)","I don't know. (Captain Marvel 60:58)","I don't know. I hadn't gotten to that part yet. (Doctor Strange 51:38)","I don't know. (Doctor Strange 67:59)"],
